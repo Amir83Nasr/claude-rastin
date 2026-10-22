@@ -48,7 +48,8 @@ previous block instead of stacking. Patches from
 
 Claude Code updates replace these files, wiping the patch. Rastin re-applies on
 every VS Code startup; for an update during a session, run
-`Rastin: Repair after Claude Code update`. Reload the window after changes.
+`Rastin: Repair after Claude Code update`. The chat webview reloads itself
+when the patch changes.
 
 ## Install
 
@@ -58,7 +59,8 @@ npm run package
 code --install-extension rastin-claude-code-0.2.0.vsix
 ```
 
-Then reload the window. Disable any other Claude Code RTL extension first.
+Then reload the window once so VS Code picks up the new build. Disable any
+other Claude Code RTL extension first.
 
 ## Settings
 
@@ -79,7 +81,8 @@ CSP blocks `data:` fonts. A family that is not installed falls back to
 IranYekanX. `rastin.theme: claude` switches the chat to Claude's warm ivory
 (light) or slate (dark) palette while following VS Code's light/dark mode.
 
-Settings are applied on change; reload the window when prompted.
+Settings apply on change: Rastin re-patches the webview and reloads the chat
+webview in place, so no window reload is needed.
 
 The status bar item opens the Rastin menu (settings, repair, enable/disable).
 It shows no mode because direction is automatic.

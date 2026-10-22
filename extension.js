@@ -14,6 +14,8 @@ let statusBar;
 /** @type {Promise<unknown>} */
 let queue = Promise.resolve();
 let warnedLegacy = false;
+/** @type {NodeJS.Timeout | undefined} */
+let pendingSync;
 
 // ── CONFIG ─────────────────────────────────────────────────────────────
 
@@ -68,9 +70,7 @@ async function runSync(interactive) {
       return;
     }
     log(`removed: ${describe(undo.changed)}`);
-    if (interactive && undo.changed.length > 0) {
-      await promptReload('Rastin removed from Claude Code');
-    }
+    if (interactive && undo.changed.length > 0) await refreshWebviews();
     return;
   }
 
@@ -82,10 +82,8 @@ async function runSync(interactive) {
     notifyNoTarget();
     return;
   }
-  log(`applied: ${describe(applied.changed)}`);
-  if (applied.changed.length > 0) {
-    await promptReload(`Rastin applied to ${applied.targets} Claude Code build`);
-  }
+  log(`applied (${applied.targets}): ${describe(applied.changed)}`);
+  if (interactive && applied.changed.length > 0) await refreshWebviews();
 }
 
 function describe(changed) {
@@ -98,13 +96,22 @@ function notifyNoTarget() {
   );
 }
 
-async function promptReload(message) {
-  const choice = await vscode.window.showInformationMessage(
-    `${message}. Reload the window to apply.`,
-    'Reload Window',
-  );
-  if (choice === 'Reload Window') {
-    await vscode.commands.executeCommand('workbench.action.reloadWindow');
+// The patched CSS/JS only reaches the chat once its webview reloads. VS
+// Code's own "Reload Webviews" command does that in place, so settings apply
+// without a window reload.
+async function refreshWebviews() {
+  try {
+    await vscode.commands.executeCommand(
+      'workbench.action.webview.reloadWebviewAction',
+    );
+  } catch {
+    const choice = await vscode.window.showInformationMessage(
+      'Rastin: reload the window to apply the change.',
+      'Reload Window',
+    );
+    if (choice) {
+      await vscode.commands.executeCommand('workbench.action.reloadWindow');
+    }
   }
 }
 
@@ -204,7 +211,10 @@ function activate(context) {
     vscode.workspace.onDidChangeConfiguration((event) => {
       if (!event.affectsConfiguration('rastin')) return;
       updateStatusBar();
-      sync(true);
+      // A number setting fires per keystroke; collapse the burst so the
+      // webview reloads once.
+      clearTimeout(pendingSync);
+      pendingSync = setTimeout(() => sync(true), 250);
     }),
   );
 
@@ -216,7 +226,12 @@ function activate(context) {
   // once after the dust settles; the patch is idempotent and a no-op when
   // the files already match.
   const settle = setTimeout(() => sync(false), 3000);
-  context.subscriptions.push({ dispose: () => clearTimeout(settle) });
+  context.subscriptions.push({
+    dispose: () => {
+      clearTimeout(settle);
+      clearTimeout(pendingSync);
+    },
+  });
 }
 
 function deactivate() {
