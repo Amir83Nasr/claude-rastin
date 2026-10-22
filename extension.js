@@ -70,6 +70,7 @@ async function runSync(interactive) {
       return;
     }
     log(`removed: ${describe(undo.changed)}`);
+    warnFailed(undo.failed, interactive);
     if (interactive && undo.changed.length > 0) await refreshWebviews();
     return;
   }
@@ -83,7 +84,17 @@ async function runSync(interactive) {
     return;
   }
   log(`applied (${applied.targets}): ${describe(applied.changed)}`);
+  warnFailed(applied.failed, interactive);
   if (interactive && applied.changed.length > 0) await refreshWebviews();
+}
+
+function warnFailed(failed, interactive) {
+  if (!failed || failed.length === 0) return;
+  log(`failed: ${failed.join('; ')}`);
+  if (!interactive) return;
+  vscode.window.showWarningMessage(
+    `Rastin: ${failed.length} Claude Code build(s) not patched. See the Rastin output channel.`,
+  );
 }
 
 function describe(changed) {

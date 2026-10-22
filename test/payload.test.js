@@ -72,7 +72,8 @@ test('a font file becomes RastinUser and is copied by absolute path', () => {
   );
   const extra = payload.fonts.find((font) => font.family === 'RastinUser');
   assert.equal(extra.from, file);
-  assert.equal(extra.to, 'rastin-user-font.woff2');
+  // Content-hashed name, so a swapped font cannot come from the cache.
+  assert.match(extra.to, /^rastin-user-font-[0-9a-f]{8}\.woff2$/);
 });
 
 test('a missing or unsupported font file falls back to IranYekanX', () => {
@@ -86,9 +87,60 @@ test('a missing or unsupported font file falls back to IranYekanX', () => {
 
 test('theme claude adds its palette, vscode leaves colors alone', () => {
   const claude = build({ root, theme: 'claude' });
+  assert.match(claude.css, /--app-primary-background: #faf9f5/);
   assert.match(claude.css, /--app-primary-background: #141413/);
-  assert.match(claude.css, /body\.vscode-light/);
+  assert.match(claude.css, /body\.vscode-light:not/);
+  assert.match(claude.css, /body\.vscode-dark:not/);
 
   const plain = build({ root, theme: 'vscode' });
   assert.equal(plain.css.includes('--app-primary-background'), false);
+});
+
+test('explicit claude themes ignore the VS Code light/dark class', () => {
+  const dark = build({ root, theme: 'claude-dark' }).css;
+  assert.equal(dark.includes('body.vscode-light'), false);
+  assert.match(dark, /:root:not\(\[class\*="high-contrast"\]\),/);
+  assert.match(dark, /--app-primary-background: #141413/);
+  assert.equal(dark.includes('--app-primary-background: #faf9f5'), false);
+
+  const light = build({ root, theme: 'claude-light' }).css;
+  assert.match(light, /--app-primary-background: #faf9f5/);
+  assert.equal(light.includes('body.vscode-dark'), false);
+  assert.equal((light.match(/claude palette/g) || []).length, 1);
+});
+
+test('every palette block keeps high contrast untouched', () => {
+  for (const theme of ['claude', 'claude-light', 'claude-dark']) {
+    const blocks =
+      build({ root, theme }).css.match(
+        /\/\* claude palette[\s\S]*?\n\}/g,
+      ) || [];
+    assert.ok(blocks.length > 0, theme);
+    for (const block of blocks) {
+      assert.ok(block.split('\n')[1].includes('high-contrast'), block);
+    }
+  }
+});
+
+test('an unknown theme value falls back to the VS Code colors', () => {
+  assert.equal(
+    build({ root, theme: 'solarized' }).css.includes('--app-'),
+    false,
+  );
+});
+
+test('line height steps by 0.1 in the settings UI', () => {
+  const pkg = JSON.parse(
+    fs.readFileSync(path.join(root, 'package.json'), 'utf8'),
+  );
+  const props = pkg.contributes.configuration.properties;
+  // A number field steps by 1, so the 0.1 steps come from the enum list.
+  const heights = props['rastin.lineHeight'].enum;
+  assert.ok(heights.includes(1.5));
+  for (let i = 1; i < heights.length; i += 1) {
+    assert.ok(Math.abs(heights[i] - heights[i - 1] - 0.1) < 1e-9);
+  }
+  assert.equal(props['rastin.fontSize'].type, 'integer');
+  assert.ok(props['rastin.theme'].enum.includes('claude-dark'));
+  assert.ok(props['rastin.theme'].enum.includes('claude-light'));
 });

@@ -92,6 +92,12 @@ test('a technical English line still reads LTR', () => {
   });
 });
 
+test('a skipped todo line with commands and Airplane reads RTL', () => {
+  const line =
+    'skipped: تست انتها-به-انتها با pnpm build && pnpm start و حالت Airplane. add when: قبل از انتشار نسخه PWA.';
+  assert.equal(detectSeatDir(line).dir, 'rtl');
+});
+
 test('a Persian sentence with product names stays RTL', () => {
   assert.equal(detectSeatDir('از GitHub Actions استفاده می‌کنیم').dir, 'rtl');
   assert.equal(detectSeatDir('GitHub Actions را تنظیم کن').dir, 'rtl');

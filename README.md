@@ -62,7 +62,7 @@ when the patch changes.
 ```sh
 npm test
 npm run package
-code --install-extension rastin-claude-code-0.2.2.vsix
+code --install-extension rastin-claude-code-0.2.4.vsix
 ```
 
 Then reload the window once so VS Code picks up the new build. Disable any
@@ -76,16 +76,38 @@ other Claude Code RTL extension first.
 | `rastin.fontWeight`     | `400` – `700`                 | `400`    |
 | `rastin.fontFamily`     | installed family name         | bundled IranYekanX |
 | `rastin.fontFile`       | absolute `.woff2`/`.woff`/`.ttf`/`.otf` path | bundled IranYekanX |
-| `rastin.fontSize`       | `0` – `32` px, `0` = host size | `0`     |
-| `rastin.lineHeight`     | `1.2` – `2.4`                 | `1.5`    |
+| `rastin.fontSize`       | `0` (host size) or `8` – `32` px | `0`    |
+| `rastin.lineHeight`     | `1.2` – `2.4`, 0.1 steps      | `1.5`    |
 | `rastin.codeFontFamily` | installed family name         | VS Code editor font |
-| `rastin.theme`          | `vscode` / `claude`           | `vscode` |
+| `rastin.theme`          | `vscode` / `claude` / `claude-light` / `claude-dark` | `vscode` |
 
 `rastin.fontFile` wins over `rastin.fontFamily`: the file is copied into the
 webview next to the bundled faces and used as `RastinUser`, because the webview
-CSP blocks `data:` fonts. A family that is not installed falls back to
-IranYekanX. `rastin.theme: claude` switches the chat to Claude's warm ivory
-(light) or slate (dark) palette while following VS Code's light/dark mode.
+CSP blocks `data:` fonts. Its file name carries a content hash, so swapping the
+font can never be served from the webview cache, and the previous copy is
+removed on the next patch. A family that is not installed falls back to
+IranYekanX.
+
+`rastin.lineHeight` is a list, not a free number: VS Code's number field steps
+by 1, so the 0.1 steps only exist as list options (arrow keys move one option,
+i.e. 0.1). `rastin.fontSize` is an integer field, stepped by 1 px.
+
+### Themes
+
+`rastin.theme: vscode` (default) leaves the host colors alone, so the chat
+follows the current VS Code theme. The `claude*` values repaint the chat with
+Claude's own warm palette, mapped onto the semantic `--app-*` variables the
+webview uses (surfaces, borders, inputs, menus, lists, badges, code, links,
+status colors), including the aliases the host resolves at `<html>`:
+
+| Value          | Palette                                             |
+| -------------- | --------------------------------------------------- |
+| `claude`       | ivory in a light VS Code theme, slate in a dark one |
+| `claude-light` | ivory, even in a dark VS Code theme                 |
+| `claude-dark`  | slate, even in a light VS Code theme                |
+
+High-contrast themes are never repainted: every palette rule is scoped with
+`:not([class*="high-contrast"])`, so accessibility colors stay the host's.
 
 Settings apply on change: Rastin re-patches the webview and reloads the chat
 webview in place, so no window reload is needed.

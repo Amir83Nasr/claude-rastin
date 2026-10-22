@@ -10,10 +10,13 @@
   var D = globalThis.__rastinDirection;
   if (!D || typeof document === 'undefined') return;
 
-  // Message roots: assistant markdown and the user bubble wrapper.
+  // Message roots: assistant markdown, the user bubble wrapper, and todo
+  // item text (todos live inside a tool block, outside the markdown root).
+  var TODO_CONTENT = '[class*="todoItem_"] [class*="content_"]';
   var ROOT_SELECTOR =
     '[data-testid="assistant-message"] [class*="root_"],' +
-    '[class*="userMessage_"]';
+    '[class*="userMessage_"],' +
+    TODO_CONTENT;
 
   // Paragraph-sized blocks that get their own verdict.
   var BLOCK_SELECTOR =
@@ -31,7 +34,7 @@
   }
 
   function orientRoot(root) {
-    if (inIsland(root)) return;
+    if (inIsland(root) && !root.matches(TODO_CONTENT)) return;
 
     var blocks = root.querySelectorAll(BLOCK_SELECTOR);
     var oriented = false;

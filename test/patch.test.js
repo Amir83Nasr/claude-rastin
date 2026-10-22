@@ -222,3 +222,47 @@ test('copies a user font referenced by absolute path', async (t) => {
     'user-font',
   );
 });
+
+test('prunes a stale user font when the font file changes', async (t) => {
+  const { root, target, payload } = await fixture();
+  t.after(() => fs.rm(root, { recursive: true, force: true }));
+
+  const first = path.join(root, 'first.woff2');
+  const second = path.join(root, 'second.woff2');
+  await fs.writeFile(first, 'first-font');
+  await fs.writeFile(second, 'second-font');
+
+  await patchTarget(
+    target,
+    { ...payload, fonts: [{ from: first, to: 'rastin-user-font-11111111.woff2' }] },
+    '1.2.3',
+  );
+  await patchTarget(
+    target,
+    {
+      ...payload,
+      fonts: [{ from: second, to: 'rastin-user-font-22222222.woff2' }],
+    },
+    '1.2.4',
+  );
+
+  const names = await fs.readdir(target.fontsDir);
+  assert.deepEqual(names, ['rastin-user-font-22222222.woff2']);
+});
+
+test('remove deletes the copied user font', async (t) => {
+  const { root, target, payload } = await fixture();
+  t.after(() => fs.rm(root, { recursive: true, force: true }));
+
+  const file = path.join(root, 'user.woff2');
+  await fs.writeFile(file, 'user-font');
+  const fonts = [
+    ...payload.fonts,
+    { from: file, to: 'rastin-user-font-abcdef12.woff2' },
+  ];
+  await patchTarget(target, { ...payload, fonts }, '1.2.3');
+  await removeTarget(target, { ...payload, fonts });
+
+  const names = await fs.readdir(target.fontsDir);
+  assert.deepEqual(names, []);
+});

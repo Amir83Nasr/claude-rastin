@@ -112,6 +112,21 @@ samp,
   padding-right: 0;
 }
 
+/* Todo text lives inside a tool block, which is LTR chrome; the installer
+   still gives each todo line its own dir, so start alignment must follow it. */
+[class*="todoItem_"] [dir="rtl"],
+[class*="todoItem_"] [dir="ltr"] {
+  text-align: start;
+}
+
+[class*="todoItem_"]:has(> [class*="content_"][dir="rtl"]) {
+  direction: rtl;
+}
+
+[class*="todoItem_"]:has(> [class*="content_"][dir="ltr"]) {
+  direction: ltr;
+}
+
 /* A list item in the other script than its list keeps its marker inside,
    so the marker follows the item instead of the list's padding side. */
 [data-testid="assistant-message"] :is(ul, ol)[dir="rtl"] > li[dir="ltr"],
