@@ -67,7 +67,9 @@ samp,
 [data-testid="assistant-message"] [dir="rtl"],
 [data-testid="assistant-message"] [dir="ltr"],
 [class*="userMessage_"] [dir="rtl"],
-[class*="userMessage_"] [dir="ltr"] {
+[class*="userMessage_"] [dir="ltr"],
+[class*="root_"][dir="rtl"],
+[class*="root_"][dir="ltr"] {
   text-align: start;
 }
 
@@ -161,13 +163,6 @@ samp,
   direction: ltr;
   unicode-bidi: isolate;
   text-align: left;
-}
-
-[class*="toolUse_"] [class*="root_"],
-[class*="toolResult_"] [class*="root_"],
-[class*="thinkingContent_"] [class*="root_"] {
-  direction: ltr !important;
-  text-align: left !important;
 }
 
 /* ── COMPOSER / PROMPTS ───────────────────────────────────────────────── */

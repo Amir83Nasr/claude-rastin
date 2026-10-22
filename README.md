@@ -63,7 +63,7 @@ when the patch changes.
 ```sh
 npm test
 npm run package
-code --install-extension rastin-claude-code-0.2.4.vsix
+code --install-extension rastin-claude-code-0.2.5.vsix
 ```
 
 Then reload the window once so VS Code picks up the new build. Disable any

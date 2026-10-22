@@ -13,6 +13,7 @@
   // Message roots: assistant markdown, the user bubble wrapper, and todo
   // item text (todos live inside a tool block, outside the markdown root).
   var TODO_CONTENT = '[class*="todoItem_"] [class*="content_"]';
+  var MARKDOWN_ROOT = '[class*="root_"]';
   var ROOT_SELECTOR =
     '[data-testid="assistant-message"] [class*="root_"],' +
     '[class*="userMessage_"],' +
@@ -34,7 +35,14 @@
   }
 
   function orientRoot(root) {
-    if (inIsland(root) && !root.matches(TODO_CONTENT)) return;
+    // Markdown inside a tool card is still prose: orient it instead of
+    // inheriting the card's LTR chrome. Code blocks remain islands.
+    if (
+      inIsland(root) &&
+      !root.matches(TODO_CONTENT) &&
+      !root.matches(MARKDOWN_ROOT)
+    )
+      return;
 
     var blocks = root.querySelectorAll(BLOCK_SELECTOR);
     var oriented = false;
