@@ -19,8 +19,9 @@ RTL/LTR switch to manage.
   - Persian/Hebrew prose → RTL; English prose → LTR.
   - A lone English term (`Merge کن`) → stays RTL.
   - Two English prose words at the start lock LTR (`Hello world سلام`);
-    Persian anywhere before that run keeps the paragraph RTL, even when
-    English commands follow (`skipped: تست ... pnpm build`).
+    a labeled block needs three (`skipped: test e2e`). Persian anywhere
+    before that run keeps the paragraph RTL, even when English commands
+    follow (`skipped: تست ... pnpm build`, `skipped: test e2e با ...`).
   - File names, paths, camelCase, and ALL_CAPS constants are neutral, so
     `use-online-status.ts — هوک ...` reads RTL even when Latin tokens start
     the line.
@@ -66,7 +67,7 @@ when the patch changes.
 ```sh
 npm test
 npm run package
-code --install-extension rastin-claude-code-0.2.6.vsix
+code --install-extension rastin-claude-code-0.2.7.vsix
 ```
 
 Then reload the window once so VS Code picks up the new build. Disable any

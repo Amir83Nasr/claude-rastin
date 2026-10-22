@@ -20,6 +20,7 @@ const RTL_RANGE =
 const LTR_RANGE = /[A-Za-z\u00C0-\u024F\u0370-\u03FF\u0400-\u04FF]/;
 
 const MIN_LTR_WORDS = 2;
+const LOCK_LABEL_LTR_WORDS = 3;
 const SCAN_CHARS = 2000;
 const SCAN_TOKENS = 48;
 
@@ -66,7 +67,12 @@ function stripLeadingLabel(text) {
  * @returns {{dir: 'rtl'|'ltr', locked: boolean}|null} null when no letters yet.
  */
 function detectSeatDir(text) {
+  const original = text;
   text = stripLeadingLabel(text);
+  // A label is metadata; two English words after it ("skipped: test e2e")
+  // are still a label payload, not a paragraph opening. Require a third
+  // English word before locking a labeled block to LTR.
+  const minLtr = text !== original ? LOCK_LABEL_LTR_WORDS : MIN_LTR_WORDS;
 
   const tokens = [];
   for (const match of text.matchAll(TOKEN)) {
@@ -91,7 +97,7 @@ function detectSeatDir(text) {
 
   let run = 0;
   while (run < words.length && words[run] === 'ltr') run += 1;
-  if (run >= MIN_LTR_WORDS) return { dir: 'ltr', locked: true };
+  if (run >= minLtr) return { dir: 'ltr', locked: true };
   if (words.includes('rtl')) return { dir: 'rtl', locked: false };
   return { dir: 'ltr', locked: false };
 }

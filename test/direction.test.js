@@ -108,6 +108,22 @@ test('Persian opening stays RTL when English prose follows', () => {
   assert.equal(detectSeatDir('خطا: API key is invalid').dir, 'ltr');
 });
 
+test('a label with two English words and a Persian word stays RTL', () => {
+  assert.equal(detectSeatDir('skipped: test e2e با pnpm build').dir, 'rtl');
+  assert.equal(detectSeatDir('skipped: test foo تست').dir, 'rtl');
+});
+
+test('a label with only English content stays LTR', () => {
+  assert.deepEqual(detectSeatDir('skipped: test e2e'), {
+    dir: 'ltr',
+    locked: false,
+  });
+  assert.deepEqual(detectSeatDir('Note: this is a test'), {
+    dir: 'ltr',
+    locked: true,
+  });
+});
+
 test('a skipped line keeps RTL when English commands fill the rest', () => {
   const line =
     'skipped: بررسی offline mode با pnpm build && pnpm start و cache. add when: بعد از انتشار.';
