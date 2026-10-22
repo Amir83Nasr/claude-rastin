@@ -112,6 +112,15 @@ samp,
   padding-right: 0;
 }
 
+/* A list item in the other script than its list keeps its marker inside,
+   so the marker follows the item instead of the list's padding side. */
+[data-testid="assistant-message"] :is(ul, ol)[dir="rtl"] > li[dir="ltr"],
+[data-testid="assistant-message"] :is(ul, ol)[dir="ltr"] > li[dir="rtl"],
+[class*="userMessage_"] :is(ul, ol)[dir="rtl"] > li[dir="ltr"],
+[class*="userMessage_"] :is(ul, ol)[dir="ltr"] > li[dir="rtl"] {
+  list-style-position: inside;
+}
+
 [class*="root_"] :is(th, td) {
   text-align: start;
 }

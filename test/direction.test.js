@@ -24,7 +24,7 @@ test('Hebrew prose reads RTL', () => {
   });
 });
 
-test('two English words lock LTR', () => {
+test('three English words lock LTR', () => {
   assert.deepEqual(detectSeatDir('Here is the fix'), {
     dir: 'ltr',
     locked: true,
@@ -71,6 +71,35 @@ test('label cases from the DSH direction suite', () => {
   assert.equal(detectSeatDir('Step 1: سلام').dir, 'rtl');
   assert.equal(detectSeatDir('Here is the fix برای مشکل').dir, 'ltr');
   assert.equal(detectSeatDir('Merge کن').dir, 'rtl');
+});
+
+test('file names and camelCase tokens do not outvote Persian prose', () => {
+  const lines = [
+    'use-online-status.ts — هوک useSyncExternalStore روی online/offline. اسنپ‌شات سرور true است.',
+    'offline-cache.ts — اسنپ‌شات‌های localStorage با prefix toopset:offline:؛ هر دسترسی try/catch.',
+    'offline-banner.tsx — بنر با توکن‌های status-pending, آیکون Hugeicons.',
+    'api.ts — isOfflineError(err) (status 0) و OFFLINE_MESSAGE؛ پیام خطای اتصال آفلاین صریح شد.',
+  ];
+  for (const line of lines) {
+    assert.equal(detectSeatDir(line).dir, 'rtl', line);
+  }
+});
+
+test('a technical English line still reads LTR', () => {
+  assert.deepEqual(detectSeatDir('api.ts returns the parsed payload'), {
+    dir: 'ltr',
+    locked: true,
+  });
+});
+
+test('a Persian sentence with product names stays RTL', () => {
+  assert.equal(detectSeatDir('از GitHub Actions استفاده می‌کنیم').dir, 'rtl');
+  assert.equal(detectSeatDir('GitHub Actions را تنظیم کن').dir, 'rtl');
+});
+
+test('Persian opening followed by English prose reads LTR', () => {
+  assert.equal(detectSeatDir('سلام Hello world this').dir, 'ltr');
+  assert.equal(detectSeatDir('خطا: API key is invalid').dir, 'ltr');
 });
 
 test('digits and punctuation alone yield no verdict', () => {

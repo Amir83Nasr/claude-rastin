@@ -2,10 +2,17 @@
  * Leading-run seat direction engine, shared by the injected webview script
  * and the Node tests (single source of truth, inlined at patch time).
  *
- * A single LTR tech term ("Merge کن") stays RTL; two or more consecutive
- * LTR words from the start lock the seat to LTR (a real English opening).
- * A leading label ("skipped:", "Note:", "Step 1:") does not vote: the run
- * after its colon decides, so "skipped: 2 files سلام" can still read RTL.
+ * The verdict is a majority of the first six *prose* words, not the first
+ * one. Technical tokens (file names, paths, camelCase, ALL_CAPS constants)
+ * stay neutral: Claude writes "use-online-status.ts — هوک ..." and the file
+ * name must not outvote the Persian sentence. A Persian opening followed by
+ * English prose ("خطا: API key is invalid") reads LTR, while a Persian
+ * sentence that merely names products ("از GitHub Actions استفاده") stays
+ * RTL. Ties keep the Persian opening; a leading two-word Latin run also
+ * wins a tie ("Hello world سلام"). Only three Latin prose words in a row
+ * lock LTR, so streaming text can still correct itself.
+ * A leading label in any script ("skipped:", "Note:", "خطا:", "foo.ts —")
+ * does not vote: the words after its separator decide.
  */
 
 // ── RANGES ──────────────────────────────────────────────────────────────
@@ -16,14 +23,32 @@ const RTL_RANGE =
 const LTR_RANGE = /[A-Za-z\u00C0-\u024F\u0370-\u03FF\u0400-\u04FF]/;
 
 const MIN_LTR_WORDS = 2;
+const LOCK_LTR_WORDS = 3;
+const VOTE_WORDS = 6;
 const SCAN_CHARS = 2000;
-const SCAN_WORDS = 12;
+const SCAN_TOKENS = 48;
 
-// A short Latin label at the start of a block, followed by its colon. It is
-// an English island label, not prose: "skipped: 2 files" should not lock the
-// whole paragraph to LTR before its Persian continuation loads.
+// A short label at the start of a block, in any script, followed by a colon,
+// an em/en dash, a pipe, or a spaced hyphen. It is a heading, not prose:
+// "skipped: 2 files", "خطا: API key is invalid", "foo.ts — توضیح".
 const LEADING_LABEL =
-  /^\s*(?:[A-Za-z][A-Za-z0-9._/-]{0,19}|\d{1,3}[.)]?)(?:\s+\d{1,3}[.)]?)?\s*[:：]\s*/;
+  /^\s*(?:\p{L}[\p{L}\p{N}._/-]{0,39}|\d{1,3}[.)]?)(?:\s+\d{1,3}[.)]?)?\s*(?:[:：]|[—–|]|-(?=\s))\s*/u;
+
+// One token: a letter-led run that keeps identifier punctuation inside, so
+// "use-online-status.ts" is one word, not four. It also keeps URLs,
+// "online/offline", "try/catch", and "clearCache()" together.
+const TOKEN =
+  /[\p{L}][\p{L}\p{M}\p{N}._/\\:(){}<>@#$%^&*+=|~`'-]*/gu;
+
+// Latin tokens that name code rather than prose. They do not vote, but they
+// are the fallback verdict when a block contains nothing else.
+const TECH_MARK = /[._/\\:(){}<>@#$%^&*+=|~`']/;
+const CAMEL_CASE = /[a-z][A-Z]/;
+const ALL_CAPS = /^[A-Z]{2,}$/;
+
+function isTechnical(token) {
+  return TECH_MARK.test(token) || CAMEL_CASE.test(token) || ALL_CAPS.test(token);
+}
 
 function stripLeadingLabel(text) {
   const match = LEADING_LABEL.exec(text);
@@ -41,39 +66,51 @@ function stripLeadingLabel(text) {
  */
 function detectSeatDir(text) {
   text = stripLeadingLabel(text);
-  const words = [];
-  let current = null;
-  let scanned = 0;
-  for (const ch of text) {
-    if (scanned >= SCAN_CHARS || words.length >= SCAN_WORDS) break;
-    scanned += 1;
-    let d = null;
-    if (RTL_RANGE.test(ch)) d = 'rtl';
-    else if (LTR_RANGE.test(ch)) d = 'ltr';
-    if (d === null) {
-      if (current !== null) {
-        words.push(current);
-        current = null;
-      }
-      continue;
-    }
-    if (current === null) current = d;
-    else if (current !== d) {
-      words.push(current);
-      current = d;
-    }
+
+  const tokens = [];
+  for (const match of text.matchAll(TOKEN)) {
+    if (match.index >= SCAN_CHARS || tokens.length >= SCAN_TOKENS) break;
+    const token = match[0];
+    const dir = RTL_RANGE.test(token)
+      ? 'rtl'
+      : LTR_RANGE.test(token)
+        ? 'ltr'
+        : null;
+    if (dir === null) continue;
+    tokens.push({ dir, technical: dir === 'ltr' && isTechnical(token) });
   }
-  if (current !== null) words.push(current);
-  if (words.length === 0) return null;
-  if (words[0] === 'rtl') return { dir: 'rtl', locked: false };
-  let run = 0;
-  for (const w of words) {
-    if (w !== 'ltr') break;
-    run += 1;
+  if (tokens.length === 0) return null;
+
+  const prose = tokens.filter((token) => !token.technical);
+  const chosen = prose.length > 0 ? prose : tokens;
+  const words = chosen.map((token) => token.dir);
+
+  const vote = words.slice(0, VOTE_WORDS);
+  const ltr = vote.filter((word) => word === 'ltr').length;
+  const rtl = vote.length - ltr;
+
+  let dir;
+  if (ltr > rtl) {
+    dir = 'ltr';
+  } else if (rtl > ltr) {
+    dir = 'rtl';
+  } else if (words[0] === 'rtl') {
+    // A Persian opening wins a tie: the Latin words are terms inside it.
+    dir = 'rtl';
+  } else {
+    // A two-word Latin opening ("Hello world سلام") wins a tie too; one
+    // Latin term before Persian ("Merge کن") does not.
+    const run = vote.findIndex((word) => word !== 'ltr');
+    const leading = run === -1 ? vote.length : run;
+    dir = leading >= MIN_LTR_WORDS ? 'ltr' : 'rtl';
   }
-  if (run >= MIN_LTR_WORDS) return { dir: 'ltr', locked: true };
-  if (words.includes('rtl')) return { dir: 'rtl', locked: false };
-  return { dir: 'ltr', locked: false };
+
+  const locked =
+    dir === 'ltr' &&
+    words.length >= LOCK_LTR_WORDS &&
+    words.slice(0, LOCK_LTR_WORDS).every((word) => word === 'ltr');
+
+  return { dir, locked };
 }
 
 // Subtrees whose text must not vote on the seat direction: they render as
