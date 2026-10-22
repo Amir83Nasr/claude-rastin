@@ -217,6 +217,12 @@ function activate(context) {
   updateStatusBar();
   warnLegacy();
   sync(false);
+
+  // A legacy RTL extension can re-patch on the same startup tick. Re-run
+  // once after the dust settles; the patch is idempotent and a no-op when
+  // the files already match.
+  const settle = setTimeout(() => sync(false), 3000);
+  context.subscriptions.push({ dispose: () => clearTimeout(settle) });
 }
 
 function deactivate() {
