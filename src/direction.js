@@ -4,6 +4,8 @@
  *
  * A single LTR tech term ("Merge کن") stays RTL; two or more consecutive
  * LTR words from the start lock the seat to LTR (a real English opening).
+ * A leading label ("skipped:", "Note:", "Step 1:") does not vote: the run
+ * after its colon decides, so "skipped: 2 files سلام" can still read RTL.
  */
 
 // ── RANGES ──────────────────────────────────────────────────────────────
@@ -17,6 +19,19 @@ const MIN_LTR_WORDS = 2;
 const SCAN_CHARS = 2000;
 const SCAN_WORDS = 12;
 
+// A short Latin label at the start of a block, followed by its colon. It is
+// an English island label, not prose: "skipped: 2 files" should not lock the
+// whole paragraph to LTR before its Persian continuation loads.
+const LEADING_LABEL =
+  /^\s*(?:[A-Za-z][A-Za-z0-9._/-]{0,19}|\d{1,3}[.)]?)(?:\s+\d{1,3}[.)]?)?\s*[:：]\s*/;
+
+function stripLeadingLabel(text) {
+  const match = LEADING_LABEL.exec(text);
+  if (match === null) return text;
+  const rest = text.slice(match[0].length);
+  return rest.trim() === '' ? text : rest;
+}
+
 // ── DETECTION ───────────────────────────────────────────────────────────
 
 /**
@@ -25,6 +40,7 @@ const SCAN_WORDS = 12;
  * @returns {{dir: 'rtl'|'ltr', locked: boolean}|null} null when no letters yet.
  */
 function detectSeatDir(text) {
+  text = stripLeadingLabel(text);
   const words = [];
   let current = null;
   let scanned = 0;
@@ -173,7 +189,7 @@ function mirrorSeatArrows(seat, doc = seat?.ownerDocument) {
 
 // ── EXPORTS ─────────────────────────────────────────────────────────────
 
-const api = { detectSeatDir, seatText, orientSeat, mirrorSeatArrows };
+const api = { detectSeatDir, seatText, orientSeat, mirrorSeatArrows, SEAT_ISLAND };
 
 if (typeof globalThis !== 'undefined') globalThis.__rastinDirection = api;
 if (typeof module === 'object' && module.exports) module.exports = api;

@@ -17,16 +17,29 @@ let warnedLegacy = false;
 
 // ── CONFIG ─────────────────────────────────────────────────────────────
 
+const DEFAULTS = {
+  enabled: true,
+  fontWeight: 400,
+  fontFamily: '',
+  fontFile: '',
+  fontSize: 0,
+  lineHeight: 1.5,
+  codeFontFamily: '',
+  theme: 'vscode',
+};
+
 function config() {
   const settings = vscode.workspace.getConfiguration('rastin');
-  return {
-    enabled: settings.get('enabled', true),
-    mode: settings.get('mode', 'auto'),
-  };
+  return Object.fromEntries(
+    Object.entries(DEFAULTS).map(([key, fallback]) => [
+      key,
+      settings.get(key, fallback),
+    ]),
+  );
 }
 
-function buildPayload(mode) {
-  return payload.build({ root: __dirname, mode });
+function buildPayload() {
+  return payload.build({ root: __dirname, ...config() });
 }
 
 // ── SYNC ───────────────────────────────────────────────────────────────
@@ -43,15 +56,13 @@ function sync(interactive) {
 }
 
 async function runSync(interactive) {
-  const { enabled, mode } = config();
+  const { enabled } = config();
   const version = vscode.extensions.getExtension(
     'amir83nasr.rastin-claude-code',
   )?.packageJSON.version;
 
   if (!enabled) {
-    const undo = await patch.remove({
-      payload: buildPayload(mode),
-    });
+    const undo = await patch.remove({ payload: buildPayload() });
     if (undo.targets === 0) {
       notifyNoTarget();
       return;
@@ -64,14 +75,14 @@ async function runSync(interactive) {
   }
 
   const applied = await patch.apply({
-    payload: buildPayload(mode),
+    payload: buildPayload(),
     version: version ?? 'dev',
   });
   if (applied.targets === 0) {
     notifyNoTarget();
     return;
   }
-  log(`applied (${mode}): ${describe(applied.changed)}`);
+  log(`applied: ${describe(applied.changed)}`);
   if (applied.changed.length > 0) {
     await promptReload(`Rastin applied to ${applied.targets} Claude Code build`);
   }
@@ -106,24 +117,17 @@ function log(message) {
 
 function updateStatusBar() {
   if (!statusBar) return;
-  const { enabled, mode } = config();
+  const { enabled, fontWeight, lineHeight } = config();
   if (!enabled) {
     statusBar.text = '$(globe) Rastin: Off';
     statusBar.tooltip = 'Rastin is disabled. Click to enable.';
     return;
   }
-  const label = mode === 'auto' ? 'Auto' : mode.toUpperCase();
-  statusBar.text = `$(globe) Rastin: ${label}`;
-  statusBar.tooltip = `Rastin: IranYekanX font, ${label} direction. Click to change.`;
+  statusBar.text = '$(globe) Rastin';
+  statusBar.tooltip = `Rastin: automatic direction, ${fontWeight} weight, line height ${lineHeight}. Click to manage.`;
 }
 
 // ── COMMANDS ───────────────────────────────────────────────────────────
-
-async function setMode(mode) {
-  await vscode.workspace
-    .getConfiguration('rastin')
-    .update('mode', mode, vscode.ConfigurationTarget.Global);
-}
 
 async function setEnabled(enabled) {
   await vscode.workspace
@@ -132,27 +136,17 @@ async function setEnabled(enabled) {
 }
 
 async function showMenu() {
-  const { enabled, mode } = config();
+  const { enabled } = config();
   /** @type {Array<vscode.QuickPickItem & {run: () => Promise<unknown>}>} */
   const items = [
     {
-      label: '$(symbol-namespace) Auto',
-      description:
-        'per-message direction (Persian RTL, English opening LTR)',
-      picked: enabled && mode === 'auto',
-      run: () => setMode('auto'),
-    },
-    {
-      label: '$(arrow-right) RTL',
-      description: 'always right-to-left',
-      picked: enabled && mode === 'rtl',
-      run: () => setMode('rtl'),
-    },
-    {
-      label: '$(arrow-left) LTR',
-      description: 'always left-to-right, font stays on',
-      picked: enabled && mode === 'ltr',
-      run: () => setMode('ltr'),
+      label: '$(settings-gear) Font, size, spacing, theme',
+      description: 'open settings',
+      run: () =>
+        vscode.commands.executeCommand(
+          'workbench.action.openSettings',
+          '@ext:amir83nasr.rastin-claude-code',
+        ),
     },
     {
       label: '$(wrench) Repair after Claude Code update',

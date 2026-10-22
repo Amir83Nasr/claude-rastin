@@ -9,10 +9,8 @@ select,
 [class*="userMessage_"],
 [class*="messageInput_"],
 [class*="mentionMirror_"] {
-  font-family:
-    'IRANYekanX', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
-    'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', Helvetica, Arial,
-    sans-serif;
+  /* Set by lib/payload.js from rastin.fontFamily / rastin.fontFile. */
+  font-family: var(--rastin-font-family);
 }
 
 body,
@@ -20,10 +18,7 @@ button,
 input,
 textarea,
 select {
-  font-family:
-    'IRANYekanX', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
-    'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', Helvetica, Arial,
-    sans-serif !important;
+  font-family: var(--rastin-font-family) !important;
 }
 
 /* Code keeps the editor's mono face, never IranYekan. */
@@ -33,26 +28,56 @@ kbd,
 samp,
 [class*="codeBlockWrapper_"],
 [class*="diffEditorWrapper_"] {
-  font-family:
-    var(--vscode-editor-font-family, ui-monospace), ui-monospace,
-    SFMono-Regular, Menlo, Consolas, monospace;
+  font-family: var(--rastin-code-font);
+}
+
+/* Prose blocks set line height themselves, so rastin.lineHeight needs
+   !important to reach them. */
+:is(
+    [data-testid="assistant-message"] [class*="root_"],
+    [class*="userMessage_"] [class*="root_"]
+  )
+  :is(p, li, blockquote, td, th) {
+  line-height: var(--rastin-line-height) !important;
 }
 
 /* ── RTL PROSE ────────────────────────────────────────────────────────── */
 
-/* Assistant and user markdown roots read RTL by default; the auto installer
-   writes dir="ltr" on roots whose leading run is English. */
+/* Roots start RTL; the installer writes dir on every paragraph, and the
+   root covers plain text that markdown did not wrap. Weight and line height
+   come from the extension settings through the --rastin-* variables. */
 [data-testid="assistant-message"] [class*="root_"],
 [class*="userMessage_"] [class*="root_"],
 [class*="userMessage_"] {
   direction: rtl;
   text-align: start;
   unicode-bidi: isolate;
+  font-weight: var(--rastin-font-weight, 400);
+  line-height: var(--rastin-line-height, 1.5);
 }
 
 [data-testid="assistant-message"] [class*="root_"][dir="ltr"],
 [class*="userMessage_"] [class*="root_"][dir="ltr"],
 [class*="userMessage_"][dir="ltr"] {
+  direction: ltr;
+}
+
+/* Paragraph blocks carry their own verdict; start alignment follows each
+   block's direction (left for an English paragraph inside a Persian reply). */
+[data-testid="assistant-message"] [dir="rtl"],
+[data-testid="assistant-message"] [dir="ltr"],
+[class*="userMessage_"] [dir="rtl"],
+[class*="userMessage_"] [dir="ltr"] {
+  text-align: start;
+}
+
+[data-testid="assistant-message"] [dir="rtl"],
+[class*="userMessage_"] [dir="rtl"] {
+  direction: rtl;
+}
+
+[data-testid="assistant-message"] [dir="ltr"],
+[class*="userMessage_"] [dir="ltr"] {
   direction: ltr;
 }
 
@@ -67,7 +92,7 @@ samp,
 
 /* Lists use logical padding in the host CSS, so they follow direction on
    their own. Quotes and tables need explicit start-side rules. */
-[class*="root_"]:dir(rtl) blockquote {
+[class*="root_"] blockquote:dir(rtl) {
   border-left: 0;
   border-right: 3px solid var(
     --vscode-textBlockQuote-border,
@@ -77,7 +102,7 @@ samp,
   padding-right: 12px;
 }
 
-[class*="root_"]:dir(ltr) blockquote {
+[class*="root_"] blockquote:dir(ltr) {
   border-left: 3px solid var(
     --vscode-textBlockQuote-border,
     rgba(128, 128, 128, 0.4)
@@ -123,12 +148,15 @@ samp,
 
 /* ── COMPOSER / PROMPTS ───────────────────────────────────────────────── */
 
+[class*="messageInput_"][contenteditable="true"],
 [class*="messageInput_"] [contenteditable="true"],
 [class*="messageInput_"] textarea,
 [class*="mentionMirror_"] {
   direction: rtl;
   unicode-bidi: plaintext;
   text-align: start;
+  font-weight: var(--rastin-font-weight, 400);
+  line-height: var(--rastin-line-height, 1.5);
 }
 
 [class*="otherInput_"] textarea,
@@ -159,7 +187,7 @@ samp,
   direction: ltr;
 }
 
-/* Arrow mirror spans (auto mode). */
+/* Arrow mirror spans: RTL paragraphs point arrows the RTL way. */
 [data-rastin-mirror] {
   display: inline-block;
   transform: scaleX(-1);

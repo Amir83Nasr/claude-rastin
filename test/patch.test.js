@@ -168,7 +168,7 @@ test('re-applies after a Claude Code update replaces the bundle', async (t) => {
   assert.equal(versionIn(css), '1.2.3');
 });
 
-test('removes the script half when switching auto -> rtl', async (t) => {
+test('removes the script half when payload.js is null', async (t) => {
   const { root, target, payload } = await fixture();
   t.after(() => fs.rm(root, { recursive: true, force: true }));
 
@@ -196,4 +196,29 @@ test('stripBlocks handles repeated blocks', () => {
   const result = stripBlocks(text, [[START, END]]);
   assert.equal(result.removed, 2);
   assert.equal(result.text, 'base\n');
+});
+
+test('copies a user font referenced by absolute path', async (t) => {
+  const { root, target, payload } = await fixture();
+  t.after(() => fs.rm(root, { recursive: true, force: true }));
+
+  const file = path.join(root, 'user.woff2');
+  await fs.writeFile(file, 'user-font');
+
+  const changed = await patchTarget(
+    target,
+    {
+      ...payload,
+      fonts: [{ from: file, to: 'rastin-user-font.woff2' }],
+    },
+    '1.2.3',
+  );
+  assert.ok(changed.includes(`${target.name}: fonts`));
+  assert.equal(
+    await fs.readFile(
+      path.join(target.fontsDir, 'rastin-user-font.woff2'),
+      'utf8',
+    ),
+    'user-font',
+  );
 });

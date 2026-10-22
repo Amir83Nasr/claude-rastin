@@ -3,7 +3,12 @@
 const assert = require('node:assert/strict');
 const test = require('node:test');
 
-const { detectSeatDir, orientSeat, seatText } = require('../src/direction.js');
+const {
+  detectSeatDir,
+  mirrorSeatArrows,
+  orientSeat,
+  seatText,
+} = require('../src/direction.js');
 
 test('Persian prose reads RTL', () => {
   assert.deepEqual(detectSeatDir('سلام دنیا'), {
@@ -47,6 +52,27 @@ test('one finished English word stays provisional LTR', () => {
   });
 });
 
+test('a leading English label does not lock the paragraph to LTR', () => {
+  assert.deepEqual(detectSeatDir('skipped: 2 files سلام'), {
+    dir: 'rtl',
+    locked: false,
+  });
+});
+
+test('a label followed by a lone English word stays provisional LTR', () => {
+  assert.deepEqual(detectSeatDir('skipped: 2 files'), {
+    dir: 'ltr',
+    locked: false,
+  });
+});
+
+test('label cases from the DSH direction suite', () => {
+  assert.equal(detectSeatDir('Note: این یک تست است').dir, 'rtl');
+  assert.equal(detectSeatDir('Step 1: سلام').dir, 'rtl');
+  assert.equal(detectSeatDir('Here is the fix برای مشکل').dir, 'ltr');
+  assert.equal(detectSeatDir('Merge کن').dir, 'rtl');
+});
+
 test('digits and punctuation alone yield no verdict', () => {
   assert.equal(detectSeatDir('123 456 — ()'), null);
 });
@@ -88,4 +114,74 @@ test('a locked LTR seat never flips back after Persian streams in', () => {
   seat.textContent = 'Here is the fix: سلام';
   assert.equal(orientSeat(seat), undefined);
   assert.equal(seat.getAttribute('dir'), 'ltr');
+});
+
+function link(parent, node) {
+  node.parentNode = parent;
+  node.parentElement = parent;
+  node.replaceWith = function (...nodes) {
+    for (const next of nodes) link(parent, next);
+    const index = parent.childNodes.indexOf(node);
+    parent.childNodes.splice(index, 1, ...nodes);
+  };
+  return node;
+}
+
+function linkedSeat(text) {
+  const attributes = new Map();
+  const seat = {
+    nodeType: 1,
+    childNodes: [],
+    getAttribute: (name) => (attributes.has(name) ? attributes.get(name) : null),
+    setAttribute: (name, value) => attributes.set(name, value),
+    normalize() {
+      const merged = [];
+      for (const node of this.childNodes) {
+        const last = merged[merged.length - 1];
+        if (node.nodeType === 3 && last?.nodeType === 3) {
+          last.nodeValue += node.nodeValue;
+        } else {
+          merged.push(node);
+        }
+      }
+      this.childNodes = merged;
+    },
+  };
+  seat.childNodes.push(link(seat, { nodeType: 3, nodeValue: text }));
+  return seat;
+}
+
+function fakeDocument() {
+  return {
+    createElement: () => {
+      const attributes = new Map();
+      return {
+        nodeType: 1,
+        tagName: 'SPAN',
+        textContent: '',
+        getAttribute: (name) =>
+          attributes.has(name) ? attributes.get(name) : null,
+        setAttribute: (name, value) => attributes.set(name, value),
+      };
+    },
+    createTextNode: (value) => ({ nodeType: 3, nodeValue: value }),
+  };
+}
+
+test('flow arrows mirror inside RTL and restore inside LTR', () => {
+  const seat = linkedSeat('← سلام →');
+  const doc = fakeDocument();
+  seat.setAttribute('dir', 'rtl');
+
+  assert.equal(mirrorSeatArrows(seat, doc), 1);
+  assert.equal(seat.childNodes.length, 3);
+  assert.equal(seat.childNodes[0].getAttribute('data-rastin-mirror'), '');
+  assert.equal(seat.childNodes[0].textContent, '←');
+  assert.equal(seat.childNodes[1].nodeValue, ' سلام ');
+  assert.equal(seat.childNodes[2].textContent, '→');
+
+  seat.setAttribute('dir', 'ltr');
+  assert.equal(mirrorSeatArrows(seat, doc), 2);
+  assert.equal(seat.childNodes.length, 1);
+  assert.equal(seat.childNodes[0].nodeValue, '← سلام →');
 });

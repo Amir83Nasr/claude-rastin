@@ -1,7 +1,8 @@
 /**
  * Webview installer, appended to Claude Code's webview/index.js after
- * src/direction.js (auto mode only). It orients each message's markdown
- * root by its leading word run and mirrors RTL flow arrows.
+ * src/direction.js. Every paragraph-sized block decides its own direction by
+ * its leading word run; the message root only handles bare text. Flow arrows
+ * are mirrored per block, so an RTL paragraph never mirrors an LTR one.
  */
 (function () {
   'use strict';
@@ -9,18 +10,49 @@
   var D = globalThis.__rastinDirection;
   if (!D || typeof document === 'undefined') return;
 
-  var SEAT_SELECTOR =
+  // Message roots: assistant markdown and the user bubble wrapper.
+  var ROOT_SELECTOR =
     '[data-testid="assistant-message"] [class*="root_"],' +
     '[class*="userMessage_"]';
 
-  function orient(seat) {
-    D.orientSeat(seat);
-    D.mirrorSeatArrows(seat, seat.ownerDocument);
+  // Paragraph-sized blocks that get their own verdict.
+  var BLOCK_SELECTOR =
+    'p,li,h1,h2,h3,h4,h5,h6,blockquote,td,th,ul,ol,table,dl,dt,dd';
+
+  var ISLAND = D.SEAT_ISLAND;
+
+  function inIsland(element) {
+    return !!(element.closest && element.closest(ISLAND));
+  }
+
+  function orientBlock(block) {
+    D.orientSeat(block);
+    D.mirrorSeatArrows(block, block.ownerDocument);
+  }
+
+  function orientRoot(root) {
+    if (inIsland(root)) return;
+
+    var blocks = root.querySelectorAll(BLOCK_SELECTOR);
+    var oriented = false;
+    for (var i = 0; i < blocks.length; i++) {
+      var block = blocks[i];
+      if (inIsland(block)) continue;
+      orientBlock(block);
+      oriented = true;
+    }
+
+    // The root still decides the bubble side (user row) and covers plain
+    // text that markdown did not wrap in a paragraph.
+    D.orientSeat(root);
+    if (!oriented) D.mirrorSeatArrows(root, root.ownerDocument);
   }
 
   function sweep() {
     if (!document.querySelectorAll) return;
-    for (var seat of document.querySelectorAll(SEAT_SELECTOR)) orient(seat);
+    for (var root of document.querySelectorAll(ROOT_SELECTOR)) {
+      orientRoot(root);
+    }
   }
 
   var pending = new Set();
@@ -43,7 +75,7 @@
       sweepQueued = false;
       sweep();
     } else {
-      for (var seat of pending) orient(seat);
+      for (var root of pending) orientRoot(root);
     }
     pending.clear();
   }
@@ -66,12 +98,12 @@
         if (record.type === 'childList') sweepQueued = true;
         continue;
       }
-      var seat = host.closest(SEAT_SELECTOR);
-      if (seat === null || seat === undefined) {
+      var root = host.closest(ROOT_SELECTOR);
+      if (root === null || root === undefined) {
         if (record.type === 'childList') sweepQueued = true;
         continue;
       }
-      pending.add(seat);
+      pending.add(root);
     }
     if (pending.size > 0 || sweepQueued) queue();
   });
