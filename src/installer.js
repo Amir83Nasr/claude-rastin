@@ -14,10 +14,13 @@
   // item text (todos live inside a tool block, outside the markdown root).
   var TODO_CONTENT = '[class*="todoItem_"] [class*="content_"]';
   var MARKDOWN_ROOT = '[class*="root_"]';
+  var PLAIN_TEXT =
+    '[data-engine-markdown="plain"],[class*="markdownPlain_"]';
   var ROOT_SELECTOR =
     '[data-testid="assistant-message"] [class*="root_"],' +
     '[class*="userMessage_"],' +
-    TODO_CONTENT;
+    TODO_CONTENT + ',' +
+    PLAIN_TEXT;
 
   // Paragraph-sized blocks that get their own verdict.
   var BLOCK_SELECTOR =
@@ -40,7 +43,8 @@
     if (
       inIsland(root) &&
       !root.matches(TODO_CONTENT) &&
-      !root.matches(MARKDOWN_ROOT)
+      !root.matches(MARKDOWN_ROOT) &&
+      !root.matches(PLAIN_TEXT)
     )
       return;
 

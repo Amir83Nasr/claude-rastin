@@ -6,6 +6,8 @@ input,
 textarea,
 select,
 [class*="root_"],
+[class*="markdownPlain_"],
+[data-engine-markdown="plain"],
 [class*="userMessage_"],
 [class*="messageInput_"],
 [class*="mentionMirror_"] {
@@ -56,6 +58,15 @@ samp,
   line-height: var(--rastin-line-height, 1.5);
 }
 
+[data-testid="assistant-message"] [data-engine-markdown="plain"],
+[data-testid="assistant-message"] [class*="markdownPlain_"] {
+  direction: rtl;
+  unicode-bidi: plaintext;
+  text-align: start;
+  font-weight: var(--rastin-font-weight, 400);
+  line-height: var(--rastin-line-height, 1.5);
+}
+
 [data-testid="assistant-message"] [class*="root_"][dir="ltr"],
 [class*="userMessage_"] [class*="root_"][dir="ltr"],
 [class*="userMessage_"][dir="ltr"] {
@@ -69,7 +80,11 @@ samp,
 [class*="userMessage_"] [dir="rtl"],
 [class*="userMessage_"] [dir="ltr"],
 [class*="root_"][dir="rtl"],
-[class*="root_"][dir="ltr"] {
+[class*="root_"][dir="ltr"],
+[data-engine-markdown="plain"][dir="rtl"],
+[data-engine-markdown="plain"][dir="ltr"],
+[class*="markdownPlain_"][dir="rtl"],
+[class*="markdownPlain_"][dir="ltr"] {
   text-align: start;
 }
 

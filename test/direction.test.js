@@ -103,9 +103,15 @@ test('a Persian sentence with product names stays RTL', () => {
   assert.equal(detectSeatDir('GitHub Actions را تنظیم کن').dir, 'rtl');
 });
 
-test('Persian opening followed by English prose reads LTR', () => {
-  assert.equal(detectSeatDir('سلام Hello world this').dir, 'ltr');
+test('Persian opening stays RTL when English prose follows', () => {
+  assert.equal(detectSeatDir('سلام Hello world this').dir, 'rtl');
   assert.equal(detectSeatDir('خطا: API key is invalid').dir, 'ltr');
+});
+
+test('a skipped line keeps RTL when English commands fill the rest', () => {
+  const line =
+    'skipped: بررسی offline mode با pnpm build && pnpm start و cache. add when: بعد از انتشار.';
+  assert.equal(detectSeatDir(line).dir, 'rtl');
 });
 
 test('digits and punctuation alone yield no verdict', () => {
@@ -129,6 +135,7 @@ function fakeSeat(text) {
     textContent: text,
     getAttribute: (name) => (attributes.has(name) ? attributes.get(name) : null),
     setAttribute: (name, value) => attributes.set(name, value),
+    removeAttribute: (name) => attributes.delete(name),
     attributes,
   };
 }
@@ -140,7 +147,7 @@ test('orientSeat writes the verdict on the seat', () => {
   assert.equal(orientSeat(seat), 'skip');
 });
 
-test('a locked LTR seat never flips back after Persian streams in', () => {
+test('a locked LTR seat ignores Persian appended after its English opening', () => {
   const seat = fakeSeat('Here is the fix');
   orientSeat(seat);
   assert.equal(seat.getAttribute('dir'), 'ltr');
@@ -149,6 +156,17 @@ test('a locked LTR seat never flips back after Persian streams in', () => {
   seat.textContent = 'Here is the fix: سلام';
   assert.equal(orientSeat(seat), undefined);
   assert.equal(seat.getAttribute('dir'), 'ltr');
+});
+
+test('a reused locked seat drops the lock when its text is now Persian', () => {
+  const seat = fakeSeat('Here is the fix');
+  orientSeat(seat);
+  assert.equal(seat.getAttribute('data-rastin-dir'), 'ltr');
+
+  seat.textContent = 'skipped: تست انتها-به-انتها با pnpm build';
+  assert.equal(orientSeat(seat), 'write');
+  assert.equal(seat.getAttribute('dir'), 'rtl');
+  assert.equal(seat.getAttribute('data-rastin-dir'), null);
 });
 
 function link(parent, node) {

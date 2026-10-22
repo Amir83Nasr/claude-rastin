@@ -14,16 +14,19 @@ RTL/LTR switch to manage.
 - **IranYekanX (UltraLight, Light, Regular, Bold)** applied to chat prose, the
   composer, and UI copy. Code keeps the editor's monospace font.
 - **Per-paragraph direction** — every `p`, heading, list, quote, table, and
-  cell gets its own verdict from the majority of its first six prose words:
+  cell gets its own verdict from its first prose word, the way DSH reads a
+  paragraph:
   - Persian/Hebrew prose → RTL; English prose → LTR.
   - A lone English term (`Merge کن`) → stays RTL.
-  - File names, paths, camelCase, and ALL_CAPS constants do not vote, so
-    `use-online-status.ts — هوک ...` reads RTL even when four Latin tokens
-    start the line.
-  - Ties keep the Persian opening; two or more leading English words win a
-    tie (`Hello world سلام`).
+  - Two English prose words at the start lock LTR (`Hello world سلام`);
+    Persian anywhere before that run keeps the paragraph RTL, even when
+    English commands follow (`skipped: تست ... pnpm build`).
+  - File names, paths, camelCase, and ALL_CAPS constants are neutral, so
+    `use-online-status.ts — هوک ...` reads RTL even when Latin tokens start
+    the line.
   - A leading label (`skipped:`, `Note:`, `Step 1:`, `foo.ts —`) does not
     vote; the words after its separator decide.
+  - A stale LTR lock is dropped when a reused node now starts in Persian.
   - List markers follow the list direction; a mixed-script item keeps its
     marker inside so it does not stay on the wrong side.
 - **Arrow mirroring** — `← → ⇐ ⇒` in an RTL paragraph point the RTL way; copy
@@ -63,7 +66,7 @@ when the patch changes.
 ```sh
 npm test
 npm run package
-code --install-extension rastin-claude-code-0.2.5.vsix
+code --install-extension rastin-claude-code-0.2.6.vsix
 ```
 
 Then reload the window once so VS Code picks up the new build. Disable any

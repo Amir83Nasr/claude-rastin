@@ -2,17 +2,14 @@
  * Leading-run seat direction engine, shared by the injected webview script
  * and the Node tests (single source of truth, inlined at patch time).
  *
- * The verdict is a majority of the first six *prose* words, not the first
- * one. Technical tokens (file names, paths, camelCase, ALL_CAPS constants)
- * stay neutral: Claude writes "use-online-status.ts — هوک ..." and the file
- * name must not outvote the Persian sentence. A Persian opening followed by
- * English prose ("خطا: API key is invalid") reads LTR, while a Persian
- * sentence that merely names products ("از GitHub Actions استفاده") stays
- * RTL. Ties keep the Persian opening; a leading two-word Latin run also
- * wins a tie ("Hello world سلام"). Only three Latin prose words in a row
- * lock LTR, so streaming text can still correct itself.
- * A leading label in any script ("skipped:", "Note:", "خطا:", "foo.ts —")
- * does not vote: the words after its separator decide.
+ * The first prose word decides, the way DSH reads a paragraph. Technical
+ * tokens (file names, paths, camelCase, ALL_CAPS constants) stay neutral:
+ * Claude writes "use-online-status.ts — هوک ..." and the file name must not
+ * start an English run. Two English prose words lock LTR ("Here is the
+ * fix"); a Persian word before that run keeps the paragraph RTL even when
+ * English commands follow ("skipped: تست ... pnpm build"). A leading label
+ * in any script ("skipped:", "Note:", "خطا:", "foo.ts —") is metadata, not
+ * prose: the words after its separator decide.
  */
 
 // ── RANGES ──────────────────────────────────────────────────────────────
@@ -23,8 +20,6 @@ const RTL_RANGE =
 const LTR_RANGE = /[A-Za-z\u00C0-\u024F\u0370-\u03FF\u0400-\u04FF]/;
 
 const MIN_LTR_WORDS = 2;
-const LOCK_LTR_WORDS = 3;
-const VOTE_WORDS = 6;
 const SCAN_CHARS = 2000;
 const SCAN_TOKENS = 48;
 
@@ -60,7 +55,13 @@ function stripLeadingLabel(text) {
 // ── DETECTION ───────────────────────────────────────────────────────────
 
 /**
- * Leading-run direction of a seat's own text.
+ * Leading-run direction of a seat's own text, in the spirit of DSH: the
+ * first *prose* word decides, a two-word English opening locks LTR, and a
+ * Persian word anywhere before that run ends keeps the seat RTL. Technical
+ * tokens (file names, paths, camelCase, ALL_CAPS constants) are neutral:
+ * Claude writes "use-online-status.ts — هوک ..." and the file name must not
+ * start an English run. A leading label in any script ("skipped:", "Note:",
+ * "خطا:", "foo.ts —") is metadata, not prose, so the words after it decide.
  * @param {string} text seat textContent.
  * @returns {{dir: 'rtl'|'ltr', locked: boolean}|null} null when no letters yet.
  */
@@ -81,36 +82,18 @@ function detectSeatDir(text) {
   }
   if (tokens.length === 0) return null;
 
+  // Ignore identifier-shaped tokens when choosing the opening word; fall
+  // back to them for a block that contains nothing but code/file names.
   const prose = tokens.filter((token) => !token.technical);
-  const chosen = prose.length > 0 ? prose : tokens;
-  const words = chosen.map((token) => token.dir);
+  const words = (prose.length > 0 ? prose : tokens).map((token) => token.dir);
 
-  const vote = words.slice(0, VOTE_WORDS);
-  const ltr = vote.filter((word) => word === 'ltr').length;
-  const rtl = vote.length - ltr;
+  if (words[0] === 'rtl') return { dir: 'rtl', locked: false };
 
-  let dir;
-  if (ltr > rtl) {
-    dir = 'ltr';
-  } else if (rtl > ltr) {
-    dir = 'rtl';
-  } else if (words[0] === 'rtl') {
-    // A Persian opening wins a tie: the Latin words are terms inside it.
-    dir = 'rtl';
-  } else {
-    // A two-word Latin opening ("Hello world سلام") wins a tie too; one
-    // Latin term before Persian ("Merge کن") does not.
-    const run = vote.findIndex((word) => word !== 'ltr');
-    const leading = run === -1 ? vote.length : run;
-    dir = leading >= MIN_LTR_WORDS ? 'ltr' : 'rtl';
-  }
-
-  const locked =
-    dir === 'ltr' &&
-    words.length >= LOCK_LTR_WORDS &&
-    words.slice(0, LOCK_LTR_WORDS).every((word) => word === 'ltr');
-
-  return { dir, locked };
+  let run = 0;
+  while (run < words.length && words[run] === 'ltr') run += 1;
+  if (run >= MIN_LTR_WORDS) return { dir: 'ltr', locked: true };
+  if (words.includes('rtl')) return { dir: 'rtl', locked: false };
+  return { dir: 'ltr', locked: false };
 }
 
 // Subtrees whose text must not vote on the seat direction: they render as
@@ -155,9 +138,17 @@ function seatText(seat, limit = SCAN_CHARS) {
  * @returns {'write'|'skip'|undefined} undefined when locked LTR or no letters.
  */
 function orientSeat(seat) {
-  if (seat.getAttribute('data-rastin-dir') === 'ltr') return undefined;
   const verdict = detectSeatDir(seatText(seat));
   if (verdict === null) return undefined;
+
+  // A locked seat normally stays LTR while English text streams in. If the
+  // node was reused and now starts in Persian, the old lock is stale: drop
+  // it instead of pinning a Persian paragraph to the left.
+  if (seat.getAttribute('data-rastin-dir') === 'ltr') {
+    if (verdict.dir === 'ltr') return undefined;
+    seat.removeAttribute('data-rastin-dir');
+  }
+
   if (seat.getAttribute('dir') === verdict.dir) return 'skip';
   if (verdict.locked) seat.setAttribute('data-rastin-dir', 'ltr');
   seat.setAttribute('dir', verdict.dir);
