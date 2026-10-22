@@ -1,0 +1,166 @@
+/* ── FONT ─────────────────────────────────────────────────────────────── */
+
+body,
+button,
+input,
+textarea,
+select,
+[class*="root_"],
+[class*="userMessage_"],
+[class*="messageInput_"],
+[class*="mentionMirror_"] {
+  font-family:
+    'IRANYekanX', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
+    'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', Helvetica, Arial,
+    sans-serif;
+}
+
+body,
+button,
+input,
+textarea,
+select {
+  font-family:
+    'IRANYekanX', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
+    'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', Helvetica, Arial,
+    sans-serif !important;
+}
+
+/* Code keeps the editor's mono face, never IranYekan. */
+pre,
+code,
+kbd,
+samp,
+[class*="codeBlockWrapper_"],
+[class*="diffEditorWrapper_"] {
+  font-family:
+    var(--vscode-editor-font-family, ui-monospace), ui-monospace,
+    SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+/* ── RTL PROSE ────────────────────────────────────────────────────────── */
+
+/* Assistant and user markdown roots read RTL by default; the auto installer
+   writes dir="ltr" on roots whose leading run is English. */
+[data-testid="assistant-message"] [class*="root_"],
+[class*="userMessage_"] [class*="root_"],
+[class*="userMessage_"] {
+  direction: rtl;
+  text-align: start;
+  unicode-bidi: isolate;
+}
+
+[data-testid="assistant-message"] [class*="root_"][dir="ltr"],
+[class*="userMessage_"] [class*="root_"][dir="ltr"],
+[class*="userMessage_"][dir="ltr"] {
+  direction: ltr;
+}
+
+/* RTL user bubbles sit on the right, the way an RTL chat reads. The host
+   pins the row left with align-items:flex-start; flip the row, not the app. */
+[class*="userMessageContainer_"]:has([class*="userMessage_"]:dir(rtl)) {
+  align-self: flex-end;
+  margin-left: auto;
+  margin-right: 0;
+  text-align: right;
+}
+
+/* Lists use logical padding in the host CSS, so they follow direction on
+   their own. Quotes and tables need explicit start-side rules. */
+[class*="root_"]:dir(rtl) blockquote {
+  border-left: 0;
+  border-right: 3px solid var(
+    --vscode-textBlockQuote-border,
+    rgba(128, 128, 128, 0.4)
+  );
+  padding-left: 0;
+  padding-right: 12px;
+}
+
+[class*="root_"]:dir(ltr) blockquote {
+  border-left: 3px solid var(
+    --vscode-textBlockQuote-border,
+    rgba(128, 128, 128, 0.4)
+  );
+  border-right: 0;
+  padding-left: 12px;
+  padding-right: 0;
+}
+
+[class*="root_"] :is(th, td) {
+  text-align: start;
+}
+
+/* ── LTR ISLANDS ──────────────────────────────────────────────────────── */
+
+pre,
+code,
+kbd,
+samp,
+[class*="codeBlockWrapper_"],
+[class*="toolUse_"],
+[class*="toolSummary_"],
+[class*="toolBody"],
+[class*="toolResult_"],
+[class*="thinkingContent_"],
+[class*="thinkingContainer_"],
+[class*="thinkingHeader_"],
+[class*="spinnerRow_"],
+[class*="diffEditorWrapper_"],
+[class*="userMessageAttachments"],
+[data-testid*="tool-"] {
+  direction: ltr;
+  unicode-bidi: isolate;
+  text-align: left;
+}
+
+[class*="toolUse_"] [class*="root_"],
+[class*="toolResult_"] [class*="root_"],
+[class*="thinkingContent_"] [class*="root_"] {
+  direction: ltr !important;
+  text-align: left !important;
+}
+
+/* ── COMPOSER / PROMPTS ───────────────────────────────────────────────── */
+
+[class*="messageInput_"] [contenteditable="true"],
+[class*="messageInput_"] textarea,
+[class*="mentionMirror_"] {
+  direction: rtl;
+  unicode-bidi: plaintext;
+  text-align: start;
+}
+
+[class*="otherInput_"] textarea,
+[class*="otherInput_"] [contenteditable] {
+  direction: rtl;
+  unicode-bidi: plaintext;
+  text-align: start;
+}
+
+/* Question, permission, and answer copy follows its own bidi run. */
+[class*="questionBlock_"],
+[class*="questionHeader_"],
+[class*="answerText_"],
+[class*="optionText_"],
+[class*="optionContent_"],
+[class*="permissionRequestContent_"],
+[class*="errorMessage_"] {
+  unicode-bidi: plaintext;
+  text-align: start;
+}
+
+/* Icon rows and keyboard hints keep the host's LTR geometry. */
+[class*="buttonContainer_"],
+[class*="keyboardHints_"],
+[class*="iconButton_"],
+[class*="copyButton_"],
+[class*="actionButton_"] {
+  direction: ltr;
+}
+
+/* Arrow mirror spans (auto mode). */
+[data-rastin-mirror] {
+  display: inline-block;
+  transform: scaleX(-1);
+}

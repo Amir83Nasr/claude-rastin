@@ -1,0 +1,77 @@
+{
+  "name": "rastin-claude-code",
+  "displayName": "Rastin — Persian RTL for Claude Code",
+  "description": "IranYekanX face and per-message RTL/LTR direction for Claude Code's chat in VS Code. Code and tool rows stay LTR.",
+  "version": "0.1.0",
+  "publisher": "amir83nasr",
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.94.0"
+  },
+  "categories": [
+    "Other",
+    "Language Packs"
+  ],
+  "keywords": [
+    "persian",
+    "farsi",
+    "rtl",
+    "bidi",
+    "claude-code",
+    "iran-yekan",
+    "font"
+  ],
+  "main": "./extension.js",
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "rastin.enable",
+        "title": "Rastin: Enable"
+      },
+      {
+        "command": "rastin.disable",
+        "title": "Rastin: Disable"
+      },
+      {
+        "command": "rastin.repair",
+        "title": "Rastin: Repair after Claude Code update"
+      },
+      {
+        "command": "rastin.menu",
+        "title": "Rastin: Menu"
+      }
+    ],
+    "configuration": {
+      "title": "Rastin",
+      "properties": {
+        "rastin.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Apply the Rastin font and direction rules to Claude Code."
+        },
+        "rastin.mode": {
+          "type": "string",
+          "enum": [
+            "auto",
+            "rtl",
+            "ltr"
+          ],
+          "enumDescriptions": [
+            "Each message follows its own leading word run. Lone English terms stay RTL; two or more English words lock LTR.",
+            "All chat prose reads right-to-left.",
+            "All chat prose reads left-to-right while the Persian font stays on."
+          ],
+          "default": "auto",
+          "description": "Chat direction mode."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "test": "node --test",
+    "package": "npx -y @vscode/vsce package --allow-missing-repository"
+  }
+}

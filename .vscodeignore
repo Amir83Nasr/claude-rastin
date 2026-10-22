@@ -1,0 +1,8 @@
+.git/**
+.githooks/**
+.github/**
+test/**
+node_modules/**
+*.vsix
+.DS_Store
+.gitignore
