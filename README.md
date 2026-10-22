@@ -11,8 +11,8 @@ RTL/LTR switch to manage.
 
 ## What it does
 
-- **IranYekanX (Regular + Bold)** applied to chat prose, the composer, and UI
-  copy. Code keeps the editor's monospace font.
+- **IranYekanX (UltraLight, Light, Regular, Bold)** applied to chat prose, the
+  composer, and UI copy. Code keeps the editor's monospace font.
 - **Per-paragraph direction** — every `p`, heading, list, quote, table, and
   cell gets its own verdict from the majority of its first six prose words:
   - Persian/Hebrew prose → RTL; English prose → LTR.
@@ -44,8 +44,9 @@ used by other RTL extensions:
 
 - appends its CSS to `webview/index.css`;
 - appends the direction engine to `webview/index.js`;
-- copies its two woff2 faces into `webview/fonts/` (the webview CSP allows fonts
-  only from its own extension source, so a `data:` font would be blocked).
+- copies its four woff2 faces into `webview/fonts/` (the webview CSP allows
+  fonts only from its own extension source, so a `data:` font would be
+  blocked).
 
 Every write is atomic, guarded against shrinking a bundle, and delimited by
 `/* rastin:start */` … `/* rastin:end */` markers, so re-applying replaces the
@@ -73,7 +74,7 @@ other Claude Code RTL extension first.
 | Setting                 | Values                        | Default  |
 | ----------------------- | ----------------------------- | -------- |
 | `rastin.enabled`        | `true` / `false`              | `true`   |
-| `rastin.fontWeight`     | `400` – `700`                 | `400`    |
+| `rastin.fontWeight`     | `200` – `700`                 | `400`    |
 | `rastin.fontFamily`     | installed family name         | bundled IranYekanX |
 | `rastin.fontFile`       | absolute `.woff2`/`.woff`/`.ttf`/`.otf` path | bundled IranYekanX |
 | `rastin.fontSize`       | `0` (host size) or `8` – `32` px | `0`    |

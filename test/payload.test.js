@@ -31,9 +31,33 @@ test('invalid user values fall back instead of leaking into CSS', () => {
 });
 
 test('bundled font assets exist', () => {
-  for (const font of ['IRANYekanX-Regular.woff2', 'IRANYekanX-Bold.woff2']) {
+  for (const font of [
+    'IRANYekanX-UltraLight.woff2',
+    'IRANYekanX-Light.woff2',
+    'IRANYekanX-Regular.woff2',
+    'IRANYekanX-Bold.woff2',
+  ]) {
     assert.ok(fs.existsSync(path.join(root, 'fonts', font)), font);
   }
+});
+
+test('the bundled family ships light faces', () => {
+  const css = build({ root, fontWeight: 300 }).css;
+  for (const weight of [200, 300, 400, 700]) {
+    assert.match(css, new RegExp(`font-weight: ${weight};`));
+  }
+  assert.match(css, /--rastin-font-weight: 300;/);
+  // Anything below the lightest face clamps to it.
+  assert.match(build({ root, fontWeight: 100 }).css, /--rastin-font-weight: 200;/);
+});
+
+test('a user font file is declared at the requested weight', () => {
+  const file = path.join(root, 'fonts', 'IRANYekanX-Light.woff2');
+  const css = build({ root, fontFile: file, fontWeight: 300 }).css;
+  assert.match(
+    css,
+    /font-family: 'RastinUser';\n  font-style: normal;\n  font-weight: 300;/,
+  );
 });
 
 test('font family, code family, and size land in the variables', () => {
@@ -79,7 +103,7 @@ test('a font file becomes RastinUser and is copied by absolute path', () => {
 test('a missing or unsupported font file falls back to IranYekanX', () => {
   const missing = build({ root, fontFile: '/nowhere/nope.woff2' });
   assert.equal(missing.css.includes('RastinUser'), false);
-  assert.equal(missing.fonts.length, 2);
+  assert.equal(missing.fonts.length, build({ root }).fonts.length);
 
   const unsupported = build({ root, fontFile: path.join(root, 'README.md') });
   assert.equal(unsupported.css.includes('RastinUser'), false);

@@ -55,19 +55,23 @@
         "rastin.fontWeight": {
           "type": "number",
           "enum": [
+            200,
+            300,
             400,
             500,
             600,
             700
           ],
           "enumDescriptions": [
-            "Regular (the face shipped in the bundle).",
-            "Medium; synthesized from Regular on the bundled face.",
-            "Semibold; synthesized from Regular on the bundled face.",
-            "Bold (the face shipped in the bundle)."
+            "UltraLight (shipped in the bundle).",
+            "Light (shipped in the bundle).",
+            "Regular (shipped in the bundle).",
+            "Medium; synthesized from Regular.",
+            "Semibold; synthesized from Regular.",
+            "Bold (shipped in the bundle)."
           ],
           "default": 400,
-          "description": "Prose font weight for Claude Code chat and composer."
+          "description": "Prose weight for Claude Code chat and composer. The bundle ships UltraLight, Light, Regular, and Bold; 500 and 600 are synthesized from Regular."
         },
         "rastin.fontFamily": {
           "type": "string",
