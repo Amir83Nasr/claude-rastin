@@ -1,0 +1,20 @@
+#!/bin/sh
+# Format staged files with Prettier and re-stage them.
+set -e
+
+cd "$(git rev-parse --show-toplevel)"
+
+[ -x node_modules/.bin/prettier ] || {
+  echo "pre-commit: run 'pnpm install' first" >&2
+  exit 1
+}
+
+files=$(git diff --cached --name-only --diff-filter=ACMR -z | tr '\0' '\n')
+
+[ -n "$files" ] || exit 0
+
+printf '%s\n' "$files" |
+  tr '\n' '\0' |
+  xargs -0 node_modules/.bin/prettier --write --ignore-unknown --log-level warn
+
+printf '%s\n' "$files" | tr '\n' '\0' | xargs -0 git add --

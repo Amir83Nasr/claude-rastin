@@ -1,3 +1,5 @@
+<p align="center"><img src="assets/logo.png" width="120" alt="Rastin"></p>
+
 # Rastin for Claude Code (VS Code)
 
 Persian chat layout for the Claude Code VS Code extension: the IranYekanX face,
@@ -64,27 +66,41 @@ when the patch changes.
 
 ## Install
 
+Grab the `.vsix` from the [latest release](../../releases/latest), then:
+
 ```sh
-npm test
-npm run package
+code --install-extension rastin-claude-code-X.Y.Z.vsix
+```
+
+To build it locally:
+
+```sh
+pnpm install
+pnpm package
 code --install-extension rastin-claude-code-0.2.7.vsix
 ```
 
 Then reload the window once so VS Code picks up the new build. Disable any
 other Claude Code RTL extension first.
 
+## Contributing
+
+`pnpm install` sets `core.hooksPath` to `.githooks/`: commits run Prettier on
+the staged files, and pushes run the same `format:check` + `test` gates as CI.
+`pnpm verify` runs both by hand.
+
 ## Settings
 
-| Setting                 | Values                        | Default  |
-| ----------------------- | ----------------------------- | -------- |
-| `rastin.enabled`        | `true` / `false`              | `true`   |
-| `rastin.fontWeight`     | `200` – `700`                 | `400`    |
-| `rastin.fontFamily`     | installed family name         | bundled IranYekanX |
-| `rastin.fontFile`       | absolute `.woff2`/`.woff`/`.ttf`/`.otf` path | bundled IranYekanX |
-| `rastin.fontSize`       | `0` (host size) or `8` – `32` px | `0`    |
-| `rastin.lineHeight`     | `1.2` – `2.4`, 0.1 steps      | `1.5`    |
-| `rastin.codeFontFamily` | installed family name         | VS Code editor font |
-| `rastin.theme`          | `vscode` / `claude` / `claude-light` / `claude-dark` | `vscode` |
+| Setting                 | Values                                               | Default             |
+| ----------------------- | ---------------------------------------------------- | ------------------- |
+| `rastin.enabled`        | `true` / `false`                                     | `true`              |
+| `rastin.fontWeight`     | `200` – `700`                                        | `400`               |
+| `rastin.fontFamily`     | installed family name                                | bundled IranYekanX  |
+| `rastin.fontFile`       | absolute `.woff2`/`.woff`/`.ttf`/`.otf` path         | bundled IranYekanX  |
+| `rastin.fontSize`       | `0` (host size) or `8` – `32` px                     | `0`                 |
+| `rastin.lineHeight`     | `1.2` – `2.4`, 0.1 steps                             | `1.5`               |
+| `rastin.codeFontFamily` | installed family name                                | VS Code editor font |
+| `rastin.theme`          | `vscode` / `claude` / `claude-light` / `claude-dark` | `vscode`            |
 
 `rastin.fontFile` wins over `rastin.fontFamily`: the file is copied into the
 webview next to the bundled faces and used as `RastinUser`, because the webview

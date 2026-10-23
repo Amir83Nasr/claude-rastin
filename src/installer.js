@@ -14,12 +14,12 @@
   // item text (todos live inside a tool block, outside the markdown root).
   var TODO_CONTENT = '[class*="todoItem_"] [class*="content_"]';
   var MARKDOWN_ROOT = '[class*="root_"]';
-  var PLAIN_TEXT =
-    '[data-engine-markdown="plain"],[class*="markdownPlain_"]';
+  var PLAIN_TEXT = '[data-engine-markdown="plain"],[class*="markdownPlain_"]';
   var ROOT_SELECTOR =
     '[data-testid="assistant-message"] [class*="root_"],' +
     '[class*="userMessage_"],' +
-    TODO_CONTENT + ',' +
+    TODO_CONTENT +
+    ',' +
     PLAIN_TEXT;
 
   // Paragraph-sized blocks that get their own verdict.
@@ -104,9 +104,7 @@
     for (var record of records) {
       var target = record.target;
       var host =
-        target !== null &&
-        typeof target === 'object' &&
-        target.nodeType === 3
+        target !== null && typeof target === 'object' && target.nodeType === 3
           ? target.parentElement
           : target;
       if (host === null || typeof host !== 'object' || !('closest' in host)) {

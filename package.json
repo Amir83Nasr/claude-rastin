@@ -1,11 +1,15 @@
 {
-  "name": "rastin-claude-code",
+  "name": "@amir83nasr/claude-rasting",
   "displayName": "Rastin — Persian RTL for Claude Code",
   "description": "IranYekanX face and per-message RTL/LTR direction for Claude Code's chat in VS Code. Code and tool rows stay LTR.",
   "version": "0.2.7",
   "publisher": "amir83nasr",
   "license": "MIT",
-  "icon": "icon.png",
+  "icon": "assets/icon.png",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Amir83Nasr/claude-rastin.git"
+  },
   "engines": {
     "vscode": "^1.94.0"
   },
@@ -137,7 +141,16 @@
     }
   },
   "scripts": {
+    "prepare": "git config core.hooksPath .githooks",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "test": "node --test",
-    "package": "npx -y @vscode/vsce package --allow-missing-repository"
+    "verify": "pnpm format:check && pnpm test",
+    "package": "rm -f ./*.vsix && pnpm exec vsce package"
+  },
+  "packageManager": "pnpm@12.6.0",
+  "devDependencies": {
+    "prettier": "^3.9.10",
+    "@vscode/vsce": "^4.0.0"
   }
 }

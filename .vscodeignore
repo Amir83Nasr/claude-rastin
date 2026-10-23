@@ -7,3 +7,6 @@ node_modules/**
 .DS_Store
 .gitignore
 logo.jpg
+TODO.md
+pnpm-workspace.yaml
+pnpm-lock.yaml

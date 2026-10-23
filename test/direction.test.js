@@ -149,7 +149,8 @@ function fakeSeat(text) {
   const attributes = new Map();
   return {
     textContent: text,
-    getAttribute: (name) => (attributes.has(name) ? attributes.get(name) : null),
+    getAttribute: (name) =>
+      attributes.has(name) ? attributes.get(name) : null,
     setAttribute: (name, value) => attributes.set(name, value),
     removeAttribute: (name) => attributes.delete(name),
     attributes,
@@ -201,7 +202,8 @@ function linkedSeat(text) {
   const seat = {
     nodeType: 1,
     childNodes: [],
-    getAttribute: (name) => (attributes.has(name) ? attributes.get(name) : null),
+    getAttribute: (name) =>
+      attributes.has(name) ? attributes.get(name) : null,
     setAttribute: (name, value) => attributes.set(name, value),
     normalize() {
       const merged = [];

@@ -1,0 +1,18 @@
+#!/bin/sh
+# Block a push that would fail CI: format check + tests.
+set -e
+
+cd "$(git rev-parse --show-toplevel)"
+
+command -v pnpm >/dev/null 2>&1 || {
+  echo "pre-push: pnpm is not installed" >&2
+  exit 1
+}
+
+[ -d node_modules ] || {
+  echo "pre-push: run 'pnpm install' first" >&2
+  exit 1
+}
+
+pnpm run --silent format:check
+pnpm run --silent test

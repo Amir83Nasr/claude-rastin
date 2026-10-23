@@ -33,8 +33,7 @@ const LEADING_LABEL =
 // One token: a letter-led run that keeps identifier punctuation inside, so
 // "use-online-status.ts" is one word, not four. It also keeps URLs,
 // "online/offline", "try/catch", and "clearCache()" together.
-const TOKEN =
-  /[\p{L}][\p{L}\p{M}\p{N}._/\\:(){}<>@#$%^&*+=|~`'-]*/gu;
+const TOKEN = /[\p{L}][\p{L}\p{M}\p{N}._/\\:(){}<>@#$%^&*+=|~`'-]*/gu;
 
 // Latin tokens that name code rather than prose. They do not vote, but they
 // are the fallback verdict when a block contains nothing else.
@@ -43,7 +42,9 @@ const CAMEL_CASE = /[a-z][A-Z]/;
 const ALL_CAPS = /^[A-Z]{2,}$/;
 
 function isTechnical(token) {
-  return TECH_MARK.test(token) || CAMEL_CASE.test(token) || ALL_CAPS.test(token);
+  return (
+    TECH_MARK.test(token) || CAMEL_CASE.test(token) || ALL_CAPS.test(token)
+  );
 }
 
 function stripLeadingLabel(text) {
@@ -223,7 +224,13 @@ function mirrorSeatArrows(seat, doc = seat?.ownerDocument) {
 
 // ── EXPORTS ─────────────────────────────────────────────────────────────
 
-const api = { detectSeatDir, seatText, orientSeat, mirrorSeatArrows, SEAT_ISLAND };
+const api = {
+  detectSeatDir,
+  seatText,
+  orientSeat,
+  mirrorSeatArrows,
+  SEAT_ISLAND,
+};
 
 if (typeof globalThis !== 'undefined') globalThis.__rastinDirection = api;
 if (typeof module === 'object' && module.exports) module.exports = api;

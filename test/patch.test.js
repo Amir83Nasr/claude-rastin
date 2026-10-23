@@ -87,7 +87,10 @@ test('apply patches css/js, copies fonts, keeps the base intact', async (t) => {
   assert.ok(js.includes('/* injected js */'));
 
   assert.equal(
-    await fs.readFile(path.join(target.fontsDir, 'rastin-regular.woff2'), 'utf8'),
+    await fs.readFile(
+      path.join(target.fontsDir, 'rastin-regular.woff2'),
+      'utf8',
+    ),
     'regular-font',
   );
 });
@@ -234,7 +237,10 @@ test('prunes a stale user font when the font file changes', async (t) => {
 
   await patchTarget(
     target,
-    { ...payload, fonts: [{ from: first, to: 'rastin-user-font-11111111.woff2' }] },
+    {
+      ...payload,
+      fonts: [{ from: first, to: 'rastin-user-font-11111111.woff2' }],
+    },
     '1.2.3',
   );
   await patchTarget(
