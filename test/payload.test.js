@@ -24,6 +24,16 @@ test('build always ships the auto-direction installer', () => {
   assert.match(payload.css, /--rastin-line-height:\s*1\.5/);
 });
 
+test('the composer rule matches plaintext-only contenteditable', () => {
+  // Claude marks the composer contenteditable="plaintext-only", and the
+  // mention mirror paints the glyphs over the input that paints the caret.
+  // A selector for [contenteditable="true"] alone leaves the input LTR
+  // while the mirror is RTL, so every caret sits one line-width off.
+  const css = build({ root }).css;
+  assert.ok(css.includes("[contenteditable]:not([contenteditable='false'])"));
+  assert.ok(css.includes("[class*='mentionMirror_']"));
+});
+
 test('invalid user values fall back instead of leaking into CSS', () => {
   const payload = build({ root, fontWeight: 'bold;}', lineHeight: NaN });
   assert.match(payload.css, /--rastin-font-weight:\s*400/);
@@ -48,7 +58,10 @@ test('the bundled family ships light faces', () => {
   }
   assert.match(css, /--rastin-font-weight: 300;/);
   // Anything below the lightest face clamps to it.
-  assert.match(build({ root, fontWeight: 100 }).css, /--rastin-font-weight: 200;/);
+  assert.match(
+    build({ root, fontWeight: 100 }).css,
+    /--rastin-font-weight: 200;/,
+  );
 });
 
 test('a user font file is declared at the requested weight', () => {
@@ -67,10 +80,7 @@ test('font family, code family, and size land in the variables', () => {
     codeFontFamily: 'Fira Code',
     fontSize: 15,
   });
-  assert.match(
-    payload.css,
-    /--rastin-font-family: 'Vazirmatn', 'IRANYekanX'/,
-  );
+  assert.match(payload.css, /--rastin-font-family: 'Vazirmatn', 'IRANYekanX'/);
   assert.match(payload.css, /--rastin-code-font: 'Fira Code', ui-monospace/);
   assert.match(payload.css, /--vscode-chat-font-size: 15px !important/);
 });
@@ -90,10 +100,7 @@ test('a font file becomes RastinUser and is copied by absolute path', () => {
   const file = path.join(root, 'fonts', 'IRANYekanX-Regular.woff2');
   const payload = build({ root, fontFile: file });
   assert.match(payload.css, /font-family: 'RastinUser'/);
-  assert.match(
-    payload.css,
-    /--rastin-font-family: 'RastinUser', 'IRANYekanX'/,
-  );
+  assert.match(payload.css, /--rastin-font-family: 'RastinUser', 'IRANYekanX'/);
   const extra = payload.fonts.find((font) => font.family === 'RastinUser');
   assert.equal(extra.from, file);
   // Content-hashed name, so a swapped font cannot come from the cache.
@@ -136,9 +143,8 @@ test('explicit claude themes ignore the VS Code light/dark class', () => {
 test('every palette block keeps high contrast untouched', () => {
   for (const theme of ['claude', 'claude-light', 'claude-dark']) {
     const blocks =
-      build({ root, theme }).css.match(
-        /\/\* claude palette[\s\S]*?\n\}/g,
-      ) || [];
+      build({ root, theme }).css.match(/\/\* claude palette[\s\S]*?\n\}/g) ||
+      [];
     assert.ok(blocks.length > 0, theme);
     for (const block of blocks) {
       assert.ok(block.split('\n')[1].includes('high-contrast'), block);

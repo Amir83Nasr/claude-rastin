@@ -5,12 +5,12 @@ button,
 input,
 textarea,
 select,
-[class*="root_"],
-[class*="markdownPlain_"],
-[data-engine-markdown="plain"],
-[class*="userMessage_"],
-[class*="messageInput_"],
-[class*="mentionMirror_"] {
+[class*='root_'],
+[class*='markdownPlain_'],
+[data-engine-markdown='plain'],
+[class*='userMessage_'],
+[class*='messageInput_'],
+[class*='mentionMirror_'] {
   /* Set by lib/payload.js from rastin.fontFamily / rastin.fontFile. */
   font-family: var(--rastin-font-family);
 }
@@ -28,16 +28,16 @@ pre,
 code,
 kbd,
 samp,
-[class*="codeBlockWrapper_"],
-[class*="diffEditorWrapper_"] {
+[class*='codeBlockWrapper_'],
+[class*='diffEditorWrapper_'] {
   font-family: var(--rastin-code-font);
 }
 
 /* Prose blocks set line height themselves, so rastin.lineHeight needs
    !important to reach them. */
 :is(
-    [data-testid="assistant-message"] [class*="root_"],
-    [class*="userMessage_"] [class*="root_"]
+    [data-testid='assistant-message'] [class*='root_'],
+    [class*='userMessage_'] [class*='root_']
   )
   :is(p, li, blockquote, td, th) {
   line-height: var(--rastin-line-height) !important;
@@ -48,9 +48,9 @@ samp,
 /* Roots start RTL; the installer writes dir on every paragraph, and the
    root covers plain text that markdown did not wrap. Weight and line height
    come from the extension settings through the --rastin-* variables. */
-[data-testid="assistant-message"] [class*="root_"],
-[class*="userMessage_"] [class*="root_"],
-[class*="userMessage_"] {
+[data-testid='assistant-message'] [class*='root_'],
+[class*='userMessage_'] [class*='root_'],
+[class*='userMessage_'] {
   direction: rtl;
   text-align: start;
   unicode-bidi: isolate;
@@ -58,8 +58,8 @@ samp,
   line-height: var(--rastin-line-height, 1.5);
 }
 
-[data-testid="assistant-message"] [data-engine-markdown="plain"],
-[data-testid="assistant-message"] [class*="markdownPlain_"] {
+[data-testid='assistant-message'] [data-engine-markdown='plain'],
+[data-testid='assistant-message'] [class*='markdownPlain_'] {
   direction: rtl;
   unicode-bidi: plaintext;
   text-align: start;
@@ -67,40 +67,40 @@ samp,
   line-height: var(--rastin-line-height, 1.5);
 }
 
-[data-testid="assistant-message"] [class*="root_"][dir="ltr"],
-[class*="userMessage_"] [class*="root_"][dir="ltr"],
-[class*="userMessage_"][dir="ltr"] {
+[data-testid='assistant-message'] [class*='root_'][dir='ltr'],
+[class*='userMessage_'] [class*='root_'][dir='ltr'],
+[class*='userMessage_'][dir='ltr'] {
   direction: ltr;
 }
 
 /* Paragraph blocks carry their own verdict; start alignment follows each
    block's direction (left for an English paragraph inside a Persian reply). */
-[data-testid="assistant-message"] [dir="rtl"],
-[data-testid="assistant-message"] [dir="ltr"],
-[class*="userMessage_"] [dir="rtl"],
-[class*="userMessage_"] [dir="ltr"],
-[class*="root_"][dir="rtl"],
-[class*="root_"][dir="ltr"],
-[data-engine-markdown="plain"][dir="rtl"],
-[data-engine-markdown="plain"][dir="ltr"],
-[class*="markdownPlain_"][dir="rtl"],
-[class*="markdownPlain_"][dir="ltr"] {
+[data-testid='assistant-message'] [dir='rtl'],
+[data-testid='assistant-message'] [dir='ltr'],
+[class*='userMessage_'] [dir='rtl'],
+[class*='userMessage_'] [dir='ltr'],
+[class*='root_'][dir='rtl'],
+[class*='root_'][dir='ltr'],
+[data-engine-markdown='plain'][dir='rtl'],
+[data-engine-markdown='plain'][dir='ltr'],
+[class*='markdownPlain_'][dir='rtl'],
+[class*='markdownPlain_'][dir='ltr'] {
   text-align: start;
 }
 
-[data-testid="assistant-message"] [dir="rtl"],
-[class*="userMessage_"] [dir="rtl"] {
+[data-testid='assistant-message'] [dir='rtl'],
+[class*='userMessage_'] [dir='rtl'] {
   direction: rtl;
 }
 
-[data-testid="assistant-message"] [dir="ltr"],
-[class*="userMessage_"] [dir="ltr"] {
+[data-testid='assistant-message'] [dir='ltr'],
+[class*='userMessage_'] [dir='ltr'] {
   direction: ltr;
 }
 
 /* RTL user bubbles sit on the right, the way an RTL chat reads. The host
    pins the row left with align-items:flex-start; flip the row, not the app. */
-[class*="userMessageContainer_"]:has([class*="userMessage_"]:dir(rtl)) {
+[class*='userMessageContainer_']:has([class*='userMessage_']:dir(rtl)) {
   align-self: flex-end;
   margin-left: auto;
   margin-right: 0;
@@ -109,21 +109,17 @@ samp,
 
 /* Lists use logical padding in the host CSS, so they follow direction on
    their own. Quotes and tables need explicit start-side rules. */
-[class*="root_"] blockquote:dir(rtl) {
+[class*='root_'] blockquote:dir(rtl) {
   border-left: 0;
-  border-right: 3px solid var(
-    --vscode-textBlockQuote-border,
-    rgba(128, 128, 128, 0.4)
-  );
+  border-right: 3px solid
+    var(--vscode-textBlockQuote-border, rgba(128, 128, 128, 0.4));
   padding-left: 0;
   padding-right: 12px;
 }
 
-[class*="root_"] blockquote:dir(ltr) {
-  border-left: 3px solid var(
-    --vscode-textBlockQuote-border,
-    rgba(128, 128, 128, 0.4)
-  );
+[class*='root_'] blockquote:dir(ltr) {
+  border-left: 3px solid
+    var(--vscode-textBlockQuote-border, rgba(128, 128, 128, 0.4));
   border-right: 0;
   padding-left: 12px;
   padding-right: 0;
@@ -131,29 +127,29 @@ samp,
 
 /* Todo text lives inside a tool block, which is LTR chrome; the installer
    still gives each todo line its own dir, so start alignment must follow it. */
-[class*="todoItem_"] [dir="rtl"],
-[class*="todoItem_"] [dir="ltr"] {
+[class*='todoItem_'] [dir='rtl'],
+[class*='todoItem_'] [dir='ltr'] {
   text-align: start;
 }
 
-[class*="todoItem_"]:has(> [class*="content_"][dir="rtl"]) {
+[class*='todoItem_']:has(> [class*='content_'][dir='rtl']) {
   direction: rtl;
 }
 
-[class*="todoItem_"]:has(> [class*="content_"][dir="ltr"]) {
+[class*='todoItem_']:has(> [class*='content_'][dir='ltr']) {
   direction: ltr;
 }
 
 /* A list item in the other script than its list keeps its marker inside,
    so the marker follows the item instead of the list's padding side. */
-[data-testid="assistant-message"] :is(ul, ol)[dir="rtl"] > li[dir="ltr"],
-[data-testid="assistant-message"] :is(ul, ol)[dir="ltr"] > li[dir="rtl"],
-[class*="userMessage_"] :is(ul, ol)[dir="rtl"] > li[dir="ltr"],
-[class*="userMessage_"] :is(ul, ol)[dir="ltr"] > li[dir="rtl"] {
+[data-testid='assistant-message'] :is(ul, ol)[dir='rtl'] > li[dir='ltr'],
+[data-testid='assistant-message'] :is(ul, ol)[dir='ltr'] > li[dir='rtl'],
+[class*='userMessage_'] :is(ul, ol)[dir='rtl'] > li[dir='ltr'],
+[class*='userMessage_'] :is(ul, ol)[dir='ltr'] > li[dir='rtl'] {
   list-style-position: inside;
 }
 
-[class*="root_"] :is(th, td) {
+[class*='root_'] :is(th, td) {
   text-align: start;
 }
 
@@ -163,18 +159,18 @@ pre,
 code,
 kbd,
 samp,
-[class*="codeBlockWrapper_"],
-[class*="toolUse_"],
-[class*="toolSummary_"],
-[class*="toolBody"],
-[class*="toolResult_"],
-[class*="thinkingContent_"],
-[class*="thinkingContainer_"],
-[class*="thinkingHeader_"],
-[class*="spinnerRow_"],
-[class*="diffEditorWrapper_"],
-[class*="userMessageAttachments"],
-[data-testid*="tool-"] {
+[class*='codeBlockWrapper_'],
+[class*='toolUse_'],
+[class*='toolSummary_'],
+[class*='toolBody'],
+[class*='toolResult_'],
+[class*='thinkingContent_'],
+[class*='thinkingContainer_'],
+[class*='thinkingHeader_'],
+[class*='spinnerRow_'],
+[class*='diffEditorWrapper_'],
+[class*='userMessageAttachments'],
+[data-testid*='tool-'] {
   direction: ltr;
   unicode-bidi: isolate;
   text-align: left;
@@ -182,10 +178,13 @@ samp,
 
 /* ── COMPOSER / PROMPTS ───────────────────────────────────────────────── */
 
-[class*="messageInput_"][contenteditable="true"],
-[class*="messageInput_"] [contenteditable="true"],
-[class*="messageInput_"] textarea,
-[class*="mentionMirror_"] {
+/* Claude's composer is contenteditable="plaintext-only", not "true": match
+   any value except false. The caret is painted by the input, the glyphs by
+   the mention mirror, so both layers must get the same direction. */
+[class*='messageInput_'][contenteditable]:not([contenteditable='false']),
+[class*='messageInput_'] [contenteditable]:not([contenteditable='false']),
+[class*='messageInput_'] textarea,
+[class*='mentionMirror_'] {
   direction: rtl;
   unicode-bidi: plaintext;
   text-align: start;
@@ -193,31 +192,31 @@ samp,
   line-height: var(--rastin-line-height, 1.5);
 }
 
-[class*="otherInput_"] textarea,
-[class*="otherInput_"] [contenteditable] {
+[class*='otherInput_'] textarea,
+[class*='otherInput_'] [contenteditable] {
   direction: rtl;
   unicode-bidi: plaintext;
   text-align: start;
 }
 
 /* Question, permission, and answer copy follows its own bidi run. */
-[class*="questionBlock_"],
-[class*="questionHeader_"],
-[class*="answerText_"],
-[class*="optionText_"],
-[class*="optionContent_"],
-[class*="permissionRequestContent_"],
-[class*="errorMessage_"] {
+[class*='questionBlock_'],
+[class*='questionHeader_'],
+[class*='answerText_'],
+[class*='optionText_'],
+[class*='optionContent_'],
+[class*='permissionRequestContent_'],
+[class*='errorMessage_'] {
   unicode-bidi: plaintext;
   text-align: start;
 }
 
 /* Icon rows and keyboard hints keep the host's LTR geometry. */
-[class*="buttonContainer_"],
-[class*="keyboardHints_"],
-[class*="iconButton_"],
-[class*="copyButton_"],
-[class*="actionButton_"] {
+[class*='buttonContainer_'],
+[class*='keyboardHints_'],
+[class*='iconButton_'],
+[class*='copyButton_'],
+[class*='actionButton_'] {
   direction: ltr;
 }
 
