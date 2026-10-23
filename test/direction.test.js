@@ -113,15 +113,32 @@ test('a label with two English words and a Persian word stays RTL', () => {
   assert.equal(detectSeatDir('skipped: test foo تست').dir, 'rtl');
 });
 
-test('a label with only English content stays LTR', () => {
+test('a label with only English content stays LTR, unlocked', () => {
+  // A label can head either script ("Note: this is a test" vs
+  // "Note: run the tests لطفا"), so its English never locks the seat.
   assert.deepEqual(detectSeatDir('skipped: test e2e'), {
     dir: 'ltr',
     locked: false,
   });
   assert.deepEqual(detectSeatDir('Note: this is a test'), {
     dir: 'ltr',
-    locked: true,
+    locked: false,
   });
+});
+
+test('a labeled paragraph keeps reading past its English words', () => {
+  const lines = [
+    'Note: run the tests before commit لطفا',
+    'Note: The build is green. سلام دنیا',
+    'Note: added retry logic to the fetch. حالا خطاها کمتر شد',
+    '**Note:** this is a test سلام',
+    '- Note: this is a test سلام',
+    '### Note: این تغییر API را عوض می‌کند',
+  ];
+  for (const line of lines) {
+    assert.equal(detectSeatDir(line).dir, 'rtl', line);
+    assert.equal(detectSeatDir(line).locked, false, line);
+  }
 });
 
 test('a skipped line keeps RTL when English commands fill the rest', () => {

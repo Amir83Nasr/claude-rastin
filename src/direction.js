@@ -20,15 +20,16 @@ const RTL_RANGE =
 const LTR_RANGE = /[A-Za-z\u00C0-\u024F\u0370-\u03FF\u0400-\u04FF]/;
 
 const MIN_LTR_WORDS = 2;
-const LOCK_LABEL_LTR_WORDS = 3;
 const SCAN_CHARS = 2000;
 const SCAN_TOKENS = 48;
 
 // A short label at the start of a block, in any script, followed by a colon,
 // an em/en dash, a pipe, or a spaced hyphen. It is a heading, not prose:
-// "skipped: 2 files", "خطا: API key is invalid", "foo.ts — توضیح".
+// "skipped: 2 files", "خطا: API key is invalid", "foo.ts — توضیح". Claude
+// writes labels in markdown too ("**Note:** ...", "- Note: ...", "### Note:"),
+// so list/heading/emphasis wrappers are part of the label.
 const LEADING_LABEL =
-  /^\s*(?:\p{L}[\p{L}\p{N}._/-]{0,39}|\d{1,3}[.)]?)(?:\s+\d{1,3}[.)]?)?\s*(?:[:：]|[—–|]|-(?=\s))\s*/u;
+  /^\s*(?:(?:[-*+>]|#{1,6}|\d{1,3}[.)])\s+)?(?:\*\*|__|[*_`])?\s*(?:\p{L}[\p{L}\p{N}._/-]{0,39}|\d{1,3}[.)]?)(?:\s+\d{1,3}[.)]?)?\s*(?:\*\*|__|[*_`])?\s*(?:[:：]|[—–|]|-(?=\s))[\s*_`~]*/u;
 
 // One token: a letter-led run that keeps identifier punctuation inside, so
 // "use-online-status.ts" is one word, not four. It also keeps URLs,
@@ -68,12 +69,12 @@ function stripLeadingLabel(text) {
  * @returns {{dir: 'rtl'|'ltr', locked: boolean}|null} null when no letters yet.
  */
 function detectSeatDir(text) {
-  const original = text;
-  text = stripLeadingLabel(text);
-  // A label is metadata; two English words after it ("skipped: test e2e")
-  // are still a label payload, not a paragraph opening. Require a third
-  // English word before locking a labeled block to LTR.
-  const minLtr = text !== original ? LOCK_LABEL_LTR_WORDS : MIN_LTR_WORDS;
+  const stripped = stripLeadingLabel(text);
+  // A label can head either script, so it never locks the seat: English
+  // after it ("Note: this is a test") stays provisional LTR and a Persian
+  // word further in ("Note: run the tests ... و تست شد") still reads RTL.
+  const labeled = stripped !== text;
+  text = stripped;
 
   const tokens = [];
   for (const match of text.matchAll(TOKEN)) {
@@ -98,7 +99,7 @@ function detectSeatDir(text) {
 
   let run = 0;
   while (run < words.length && words[run] === 'ltr') run += 1;
-  if (run >= minLtr) return { dir: 'ltr', locked: true };
+  if (run >= MIN_LTR_WORDS && !labeled) return { dir: 'ltr', locked: true };
   if (words.includes('rtl')) return { dir: 'rtl', locked: false };
   return { dir: 'ltr', locked: false };
 }

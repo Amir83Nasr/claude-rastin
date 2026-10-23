@@ -176,6 +176,16 @@ samp,
   text-align: left;
 }
 
+/* Claude renders the ★ Insight header and its ─ footer as block-level,
+   fit-content <code> scaffolding. Auto margins are zeroed by default, so
+   under an RTL paragraph the box lands on the right. Pin it physically
+   left; the code island rule above already handles its bidi. */
+[class*='insightHeader_'],
+[class*='insightFooter_'] {
+  margin-left: 0;
+  margin-right: auto;
+}
+
 /* ── COMPOSER / PROMPTS ───────────────────────────────────────────────── */
 
 /* Claude's composer is contenteditable="plaintext-only", not "true": match
@@ -193,22 +203,58 @@ samp,
 }
 
 [class*='otherInput_'] textarea,
-[class*='otherInput_'] [contenteditable] {
+[class*='otherInput_'] [contenteditable],
+[class*='rejectMessageInput_'] [contenteditable] {
   direction: rtl;
   unicode-bidi: plaintext;
   text-align: start;
 }
 
-/* Question, permission, and answer copy follows its own bidi run. */
+/* Question, permission, and answer copy follows its own bidi run. The
+   question panel's text lines sit outside every message root, so the
+   installer writes their dir and these rules give them start alignment. */
 [class*='questionBlock_'],
 [class*='questionHeader_'],
+[class*='questionTextLarge_'],
+[class*='navTab_'],
 [class*='answerText_'],
 [class*='optionText_'],
 [class*='optionContent_'],
+[class*='optionLabel_'],
+[class*='optionDescription_'],
+[class*='previewCaption_'],
 [class*='permissionRequestContent_'],
+[class*='permissionRequestHeader_'],
+[class*='permissionRequestDescription_'],
+[class*='permissionRequestInput_'],
 [class*='errorMessage_'] {
   unicode-bidi: plaintext;
   text-align: start;
+}
+
+/* The "Other" answer reuses the message composer's contenteditable input,
+   whose placeholder is pinned to the physical left. */
+[class*='otherInput_'] [class*='placeholder_'],
+[class*='rejectMessageInput_'] [class*='placeholder_'] {
+  left: auto;
+  right: 8px;
+}
+
+/* An option row is a flex row with the radio first. When its label is RTL
+   the radio belongs on the right, and the highlight bar (inset shadow on
+   the left) moves with it. */
+[role='radio']:has([class*='optionLabel_'][dir='rtl']),
+[role='checkbox']:has([class*='optionLabel_'][dir='rtl']) {
+  flex-direction: row-reverse;
+}
+
+[role='radio'][class*='optionHighlighted_']:has(
+    [class*='optionLabel_'][dir='rtl']
+  ),
+[role='checkbox'][class*='optionHighlighted_']:has(
+    [class*='optionLabel_'][dir='rtl']
+  ) {
+  box-shadow: inset -2px 0 0 0 var(--app-button-background);
 }
 
 /* Icon rows and keyboard hints keep the host's LTR geometry. */

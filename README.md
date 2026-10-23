@@ -1,4 +1,4 @@
-<p align="center"><img src="assets/logo.png" width="120" alt="Rastin"></p>
+<p align="left"><img src="assets/logo.png" width="120" alt="Rastin"></p>
 
 # Rastin for Claude Code (VS Code)
 
@@ -20,15 +20,15 @@ RTL/LTR switch to manage.
   paragraph:
   - Persian/Hebrew prose → RTL; English prose → LTR.
   - A lone English term (`Merge کن`) → stays RTL.
-  - Two English prose words at the start lock LTR (`Hello world سلام`);
-    a labeled block needs three (`skipped: test e2e`). Persian anywhere
-    before that run keeps the paragraph RTL, even when English commands
-    follow (`skipped: تست ... pnpm build`, `skipped: test e2e با ...`).
+  - Two English prose words at the start lock LTR (`Hello world سلام`).
+    Persian anywhere before that run keeps the paragraph RTL, even when
+    English commands follow (`skipped: تست ... pnpm build`).
   - File names, paths, camelCase, and ALL_CAPS constants are neutral, so
     `use-online-status.ts — هوک ...` reads RTL even when Latin tokens start
     the line.
-  - A leading label (`skipped:`, `Note:`, `Step 1:`, `foo.ts —`) does not
-    vote; the words after its separator decide.
+  - A leading label (`skipped:`, `**Note:**`, `Step 1:`, `foo.ts —`) does not
+    vote and never locks: the words after its separator decide, and a Persian
+    word anywhere later keeps the paragraph RTL (`Note: run the tests لطفا`).
   - A stale LTR lock is dropped when a reused node now starts in Persian.
   - List markers follow the list direction; a mixed-script item keeps its
     marker inside so it does not stay on the wrong side.

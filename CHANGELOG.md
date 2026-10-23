@@ -10,6 +10,15 @@ before tagging.
 
 ## [Unreleased]
 
+### Fixed
+
+- The `★ Insight` header and its `─` footer stay pinned left instead of
+  drifting to the right edge of an RTL reply.
+- Question and permission panels (question text, tabs, option labels and
+  descriptions, previews, "Other" input, permission prompts) are now
+  oriented per line; an RTL option keeps its radio and highlight bar on the
+  right.
+
 ## [0.2.7] - 2026-10-22
 
 ### Added

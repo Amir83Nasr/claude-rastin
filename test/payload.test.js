@@ -34,6 +34,35 @@ test('the composer rule matches plaintext-only contenteditable', () => {
   assert.ok(css.includes("[class*='mentionMirror_']"));
 });
 
+test('insight banners stay left even inside an RTL root', () => {
+  // The ★ header and ─ footer are block-level fit-content <code>: under an
+  // RTL paragraph their auto margins would put the box on the right. The
+  // code island rule already gives them LTR text; only the box needs pinning.
+  const css = build({ root }).css;
+  const rule = css.match(
+    /\[class\*='insightHeader_'\],\s*\[class\*='insightFooter_'\]\s*\{[^}]*\}/,
+  );
+  assert.ok(rule, 'insight rule is missing');
+  assert.match(rule[0], /margin-left: 0;/);
+  assert.match(rule[0], /margin-right: auto;/);
+});
+
+test('the question panel is oriented like message prose', () => {
+  // The AskUserQuestion panel renders outside every message root, so its
+  // lines need their own seats: the installer must select them, and the
+  // stylesheet must align them and flip an RTL option row.
+  const payload = build({ root });
+  for (const name of ['optionLabel_', 'optionDescription_', 'navTab_']) {
+    assert.ok(payload.js.includes(`[class*="${name}"]`), name);
+  }
+  assert.ok(payload.js.includes('[class*="previewBody_"]'));
+  assert.ok(payload.css.includes("[class*='permissionRequestHeader_']"));
+  assert.match(
+    payload.css,
+    /\[role='radio'\]:has\(\[class\*='optionLabel_'\]\[dir='rtl'\]\)/,
+  );
+});
+
 test('invalid user values fall back instead of leaking into CSS', () => {
   const payload = build({ root, fontWeight: 'bold;}', lineHeight: NaN });
   assert.match(payload.css, /--rastin-font-weight:\s*400/);
@@ -153,8 +182,10 @@ test('every palette block keeps high contrast untouched', () => {
 });
 
 test('an unknown theme value falls back to the VS Code colors', () => {
+  // The palette block is the override; prose CSS may still read host vars
+  // like --app-button-background, so match the block, not that substring.
   assert.equal(
-    build({ root, theme: 'solarized' }).css.includes('--app-'),
+    build({ root, theme: 'solarized' }).css.includes('/* claude palette'),
     false,
   );
 });

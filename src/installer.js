@@ -15,12 +15,44 @@
   var TODO_CONTENT = '[class*="todoItem_"] [class*="content_"]';
   var MARKDOWN_ROOT = '[class*="root_"]';
   var PLAIN_TEXT = '[data-engine-markdown="plain"],[class*="markdownPlain_"]';
+
+  // Question and permission panels render outside every message root, so
+  // their text lines are seats of their own. The option row is not a seat:
+  // it would mix a label with its description. CSS reads the label's dir
+  // and puts the radio on that side.
+  var PANEL_TEXT =
+    '[class*="questionHeader_"],' +
+    '[class*="navTab_"],' +
+    '[class*="optionLabel_"],' +
+    '[class*="optionDescription_"],' +
+    '[class*="previewCaption_"],' +
+    '[class*="permissionRequestHeader_"],' +
+    '[class*="permissionRequestDescription_"],' +
+    '[class*="permissionRequestInput_"]';
+
+  // The question preview pane renders its markdown with the message root
+  // class, but outside any message.
+  var PANEL_MARKDOWN = '[class*="previewBody_"] [class*="root_"]';
+
   var ROOT_SELECTOR =
     '[data-testid="assistant-message"] [class*="root_"],' +
     '[class*="userMessage_"],' +
     TODO_CONTENT +
     ',' +
-    PLAIN_TEXT;
+    PLAIN_TEXT +
+    ',' +
+    PANEL_TEXT +
+    ',' +
+    PANEL_MARKDOWN;
+
+  // Seats that are prose even inside an island (tool card, code block).
+  var ISLAND_EXEMPT = [
+    TODO_CONTENT,
+    MARKDOWN_ROOT,
+    PLAIN_TEXT,
+    PANEL_TEXT,
+    PANEL_MARKDOWN,
+  ].join(',');
 
   // Paragraph-sized blocks that get their own verdict.
   var BLOCK_SELECTOR =
@@ -40,13 +72,7 @@
   function orientRoot(root) {
     // Markdown inside a tool card is still prose: orient it instead of
     // inheriting the card's LTR chrome. Code blocks remain islands.
-    if (
-      inIsland(root) &&
-      !root.matches(TODO_CONTENT) &&
-      !root.matches(MARKDOWN_ROOT) &&
-      !root.matches(PLAIN_TEXT)
-    )
-      return;
+    if (inIsland(root) && !root.matches(ISLAND_EXEMPT)) return;
 
     var blocks = root.querySelectorAll(BLOCK_SELECTOR);
     var oriented = false;
