@@ -1,0 +1,275 @@
+[fa=149 la=13 charFa=559 charLa=69 lock=true]
+6. **All user messages:** |    - "داخل بخش جستجو و کارت‌های مجموعه‌ها / ما دو نوع کارت داریم یکی رزرو آنلاین یکی رزرو با تماس / badge رزرو‌های آنلاین رو بردار و اون کارت‌هایی که رزرو تلفنی هستن رو بکن متن شو بدون رزرو آنلاین / رنگ پس زمینه شم مثل دکمه کارت بکن ا
+
+[fa=222 la=40 charFa=784 charLa=302 lock=true]
+6. All user messages: |    - (Earlier, still governing) "خب ببین، تو سوال اولت این‌که vendors بمونه. برای دومی، هرچی که صلاح می‌دونی انجام بده. برای بخش سوم می‌خوام یه چیزی با همدیگه مطمئن بشیم. این‌که توی محیط Dev الان همه‌ی عکس‌ها، حالا آواتار، بنر یا هر چیز د
+
+[fa=161 la=20 charFa=603 charLa=127 lock=true]
+6. All user messages: |    - "یه سوال داشتم الان که فرمت‌ها webp شدن چه مزیتی ایجاد کرد ؟؟" |    - "فعلا همه تغییرات رو کامیت کن تا دستور بعدی رو بدم" |    - "قبل از اینکه پوش کنیم بگو چیکار باید کنیم اینو یادآوری: پاد فعلی production نباید ریاستارت شود تا ایمیج جدی
+
+[fa=157 la=19 charFa=547 charLa=128 lock=true]
+6. All user messages: |    - (From before the earlier compaction, still governing) "خب ببین، تو سوال اولت این‌که vendors بمونه. برای دومی، هرچی که صلاح می‌دونی انجام بده. برای بخش سوم می‌خوام یه چیزی با همدیگه مطمئن بشیم. این‌که توی محیط Dev الان همه‌ی عکس‌ها، ح
+
+[fa=149 la=31 charFa=559 charLa=222 lock=true]
+6. All user messages: |    - "داخل بخش جستجو و کارت‌های مجموعه‌ها / ما دو نوع کارت داریم یکی رزرو آنلاین یکی رزرو با تماس / badge رزرو‌های آنلاین رو بردار و اون کارت‌هایی که رزرو تلفنی هستن رو بکن متن شو بدون رزرو آنلاین / رنگ پس زمینه شم مثل دکمه کارت بکن ابعاد
+
+[fa=198 la=64 charFa=803 charLa=530 lock=true]
+6. All user messages: |    - "نسخه اپلیکیشن pwa قبل از اینکه وارد برنامه و محتوای اصلی بشه یه صفحه نمایش میده که لوگو هستش و پاییین صفحه اسم سایت toopset این صفحه رو میشه حذف کرد اگه بشه حذف کن اگه نمیشه صفحه رو خالی کن یعنی یه صفحه سفید خالی بشه فقط" |    - "یبار
+
+[fa=142 la=46 charFa=498 charLa=324 lock=false]
+Note: /Users/amir/Projects/ToopSet/frontend/content/blog/volleyball-hall-qom.md changed on disk since you last read it. That's usually deliberate, so take it as the current state rather than reverting it; if the change looks wrong, say so rather than undoing i
+
+[fa=56 la=11 charFa=223 charLa=51 lock=true]
+The user sent a new message while you were working: | داخل همین صفحه هم بجای بخش ستاره که بالای صفحه هست badge رزرو فقط به صورت تلفنی نوشته بشه برای سالن‌هایی که رزرو آنلاین ندارن و badge ستاره حذف شه | همچنین چون مدیریت مشخصی ندارن این مدل مجموعه‌ها از بخش تنظیما
+
+[fa=80 la=17 charFa=298 charLa=146 lock=true]
+6. All user messages: |    - "بخش پیام‌رسان سانس‌ها / مدیریت کانال‌های دریافت پیام روزانه سانس‌ها برای هر مجموع / اسمشو بکن اتصال به پیام‌رسان‌ها اینو تو سایدبار هم اسمشو درست کن و بخش‌های دیگه که نیازه / داخل نمایش جدولش هم تو قسمت نام آیکون کنار اسم رو بردار ت
+
+[fa=60 la=9 charFa=251 charLa=109 lock=true]
+`★ Insight ─────────────────────────────────────` | - vsce لینکهای نسبی README را به URL مطلق بازنویسی میکند؛ همین باعث میشود عکسها در صفحه Marketplace درست بیایند، ولی بدون فیلد `repository` یا فلگ `--baseImagesUrl` کل بیلد شکست میخورد نه فقط عکس. | - `rm -f ./*.
+
+[fa=51 la=7 charFa=188 charLa=61 lock=true]
+b) **Most recent request (current work), verbatim:** "با دسترسی‌هایی که داریم هم به پارسپک هم به دیتابیس production میخوام اول عکس‌های داخل پارسپک که webp نیستن رو درست کنی و همچنین ساختار درستی که با هم پیاده کردیم رو مطمئن بشی درست روی production هم داره پیا
+
+[fa=51 la=10 charFa=189 charLa=71 lock=true]
+Active request being executed in this session (verbatim): "با دسترسی‌هایی که داریم هم به پارسپک هم به دیتابیس production میخوام اول عکس‌های داخل پارسپک که webp نیستن رو درست کنی و همچنین ساختار درستی که با هم پیاده کردیم رو مطمئن باشی درست روی production هم دا
+
+[fa=42 la=9 charFa=154 charLa=41 lock=true]
+The user sent a new message while you were working: | تومان رو از بیعانه حذف کن همچنین تو ویو دسکتاپ هم بیعانه بیاد سمت راست مبلغ و برای زمان سانس که خورده ۹۰ دقیقه رو کلا حذف کن و سانس ویژه آقایان تو دسکتاپ یه ستون جدا داشته باشه چون فضا داریم اونجا
+
+[fa=117 la=46 charFa=432 charLa=324 lock=false]
+Note: /Users/amir/Projects/ToopSet/frontend/content/blog/basketball-hall-qom.md changed on disk since you last read it. That's usually deliberate, so take it as the current state rather than reverting it; if the change looks wrong, say so rather than undoing i
+
+[fa=36 la=3 charFa=131 charLa=30 lock=true]
+`prettier --write`، `tsc --noEmit` و `eslint` روی فایل‌های تغییر‌یافته پاس شدند (بدون خروجی = بدون خطا). تست بصری در مرورگر انجام نشد — برای دیدن وسط‌چین در موبایل، داشبورد را در عرض زیر ۷۶۸px باز کن و خطای عمدی رندر کن.
+
+[fa=103 la=46 charFa=386 charLa=299 lock=false]
+Note: /Users/amir/Projects/ToopSet/frontend/content/blog/turf-checklist-qom.md changed on disk since you last read it. That's usually deliberate, so take it as the current state rather than reverting it; if the change looks wrong, say so rather than undoing it
+
+[fa=43 la=7 charFa=156 charLa=73 lock=true]
+6. **All user messages:** |    - "پروژه رو بررسی کن از لحاظ کیفیت کد یا ایده نیاز به بهبود داره انجام بده یا اینکه سرعت کاربر بهتر بشه تغییراتی نیازه انجام بده بعدش خلاصه کارها رو بهم بگو" |    - "اوکیه همه تغییرات رو تگ پچ جدید بزن و پوش کن" |    - (Final message: 
+
+[fa=44 la=7 charFa=168 charLa=86 lock=true]
+**B. Back button به بالای لیست برمیگردد، نه به جای قبلی.** چون عمق اسکرول در URL نیست (عمدی — هر بار اسکرول نباید history بنویسد). راههای سازگار با lazy: نگه داشتن `page` در `sessionStorage` کلیدشده با query و restore در mount؛ یا `history.replaceState` با cou
+
+[fa=49 la=5 charFa=178 charLa=97 lock=true]
+- `docker compose up -d db` → کانتینر بازساخته شد، پورت `5432:5432` منتشر شد. ولوم `tarhino_pgdata` دست‌نخورده → **داده‌ها سر جایشان**. | - [main.py](apps/api/app/main.py) → `CatchUnhandledMiddleware` اضافه شد: exceptionهای مدیرنشده را داخل لایه CORS به JSON 500
+
+[fa=41 la=7 charFa=147 charLa=67 lock=true]
+* business logic فعلی را تا حد ممکن reuse کن. | * محاسبات مالی را دوباره پیاده‌سازی نکن. | * DB schema را تغییر نده. | * callbackها را فقط در صورت نیاز تغییر بده. | * helperهای موجود را دوباره نساز. | * duplicate logic ایجاد نکن. | * functionality فعلی حذف نشود، فقط نحوه 
+
+[fa=36 la=9 charFa=120 charLa=41 lock=true]
+The user sent a new message while you were working: | اگه روی کارت سانس یا روز ردیف اون سانس کلیک شد مشخصات سانس باز بشه و قیمت و بانوان و آقایان و یا اعمال عملیات‌ها رو بشه روش اعمال کرد و تغییر داد مشخصات شو
+
+[fa=29 la=5 charFa=93 charLa=27 lock=true]
+6. All user messages: |    - "الان که لود شدن کارت‌ها تو بخش جستجو سالن‌ها lazy load شده بررسی کن بحث انیمیشن و load شدن کارت‌ها رو بررسی کن که درست و اصولی انجام بشه"
+
+[fa=30 la=4 charFa=113 charLa=54 lock=true]
+The user's single request (in Persian): "داخل بخش اتصال به پیام‌رسان‌ها الان ایتا وصل شده تلگرام رو هم وصل کن متغیر اتصالش رو هم اضافه کن برای راهنمایی اتصال از سایت یونیوم استفاده کن https://uniom.ir/integrations"
+
+[fa=19 la=2 charFa=72 charLa=13 lock=true]
+Backend APIs آماده‌ست — دارم الگوهای UI موجود را چک می‌کنم تا داشبورد و گزارشات را با همان کامپوننت‌ها بسازم.
+
+[fa=38 la=11 charFa=133 charLa=75 lock=true]
+`★ Insight ─────────────────────────────────────` | - `git commit -- <paths>` فقط همان مسیرها را از index برمی‌دارد و commit می‌کند؛ تغییرات staged دیگر دست‌نخورده در index می‌مانند. برای همین staging جزئی messaging خراب نشد. | - الگوی `MM` یعنی هم staged و هم uns
+
+[fa=13 la=3 charFa=55 charLa=12 lock=true]
+gh pr checkout 4806 | تغییرات اعمال شده روی این پول ریکوئست رو اعمال کن روی برنامه خودمون
+
+[fa=13 la=2 charFa=53 charLa=11 lock=true]
+working tree هنوز تغییرات نامرتبط دارد که کامیت نکردم چون از کار قبلی تو هستند:
+
+[fa=21 la=9 charFa=79 charLa=41 lock=true]
+The user sent a new message while you were working: | تو دسکتاپ فضا برای بخش ستون قیمت رو بیشتر کن که وقتی بیعانه بهش اضافه میشه ساختار جدول رو بهم نریزه
+
+[fa=17 la=6 charFa=57 charLa=24 lock=true]
+gh pr checkout 4842 | gh pr checkout 4840 | چک کن ببین چی تغییر کرده تو این دوتا تغییرات مفید شو اعمال کن روی کد فعلی
+
+[fa=10 la=3 charFa=44 charLa=17 lock=true]
+Top section, gallery, نظرات نیاز به بازطراحی دارن — بذار ساختار فعلی رو ببینم.
+
+[fa=19 la=9 charFa=68 charLa=41 lock=true]
+The user sent a new message while you were working: | آیکون تو ویو دسکتاپ یکم باید بزرگ‌تر بشه همچنین تو تم لایت رنگ پس‌زمینه باید اصلاح بشه
+
+[fa=18 la=9 charFa=67 charLa=41 lock=true]
+The user sent a new message while you were working: | از اونجایی که آیدی حرف بزرگ و کوچیکش فرقی نداره تمام حروف رو کوچیک ذخیره و نمایش بده
+
+[fa=11 la=2 charFa=35 charLa=10 lock=true]
+Staged diff سایر فایل‌ها را بررسی می‌کنم بعد کامیت می‌کنم.
+
+[fa=9 la=2 charFa=32 charLa=8 lock=true]
+Site + repo بررسی می‌کنم، بعد هر ۳ تغییر اعمال می‌کنم.
+
+[fa=11 la=2 charFa=32 charLa=11 lock=true]
+Need imports صف‌ها چک می‌کنم، بعد کوئری‌ها اضافه می‌کنم.
+
+[fa=10 la=2 charFa=33 charLa=12 lock=true]
+Backend stats آماده‌ست. چند فایل دیگه می‌خونم بعد می‌سازم.
+
+[fa=8 la=2 charFa=29 charLa=9 lock=true]
+input text عرضش فول بشه که فضای خالی عرضی نمونه
+
+[fa=9 la=3 charFa=34 charLa=15 lock=true]
+Hero class خوانده شد. چرخش مداوم + عدم توقف update پیاده می‌کنم:
+
+[fa=7 la=2 charFa=30 charLa=11 lock=true]
+Patch commit فایل‌های غیرمنتظره ساخت — بررسی می‌کنم.
+
+[fa=135 la=60 charFa=481 charLa=463 lock=true]
+6. All user messages: |    - "ببین یه تغییر بزرگ برای بحث ذخیره سازی عکسها تو سامانه داشته باشیم الان ما آواتار و تصاویر بنر و تصاویر سالنها رو داریم الان مدل ذخیره سازی رو بررسی میکنی که چجوری هست ؟؟\nمیخوام سه نوع تو سه پوشه متفاوت ذخیره بشن و همچنین مدل حذف ع
+
+[fa=9 la=2 charFa=30 charLa=13 lock=true]
+Backend APIs آماده‌ست. حالا الگوی UI موجود را چک می‌کنم.
+
+[fa=7 la=2 charFa=33 charLa=17 lock=true]
+**Callback migration باید بدون شکستن مسیرهای موجود انجام شود.**
+
+[fa=5 la=2 charFa=23 charLa=8 lock=true]
+Repo scan پس‌زمینه / موزیک / انیمیشن مکعب.
+
+[fa=42 la=15 charFa=143 charLa=128 lock=true]
+۲. `Cannot read properties of undefined (reading 'message')`: این ارور فرانت‌انده، نه بک‌اند. وقتی بک‌اند 404 با بادی غیر-JSON (`Not Found` خام، چون روت `/` وجود نداره) برمی‌گردونه، `body?.error` می‌شود `undefined` و خواندن `.message` کرش می‌کند. فیکس: `body?.
+
+[fa=8 la=2 charFa=26 charLa=11 lock=true]
+Health check برگشتی عجیب داد. عمیق‌تر چک می‌کنم.
+
+[fa=147 la=71 charFa=515 charLa=501 lock=true]
+6. All user messages: |    - "خب ببین، تو سوال اولت این‌که vendors بمونه. برای دومی، هرچی که صلاح می‌دونی انجام بده. برای بخش سوم می‌خوام یه چیزی با همدیگه مطمئن بشیم. این‌که توی محیط Dev الان همه‌ی عکس‌ها، حالا آواتار، بنر یا هر چیز دیگه‌ی، الان از پوشه‌ی Uploa
+
+[fa=57 la=24 charFa=194 charLa=181 lock=true]
+f) **Most recent verification request** (verbatim): "این‌که توی محیط Dev الان همه‌ی عکس‌ها، حالا آواتار، بنر یا هر چیز دیگه‌ی، الان از پوشه‌ی Uploads استفاده بکنن... این‌که عکس‌هایی که دارن استفاده می‌شن الان تو محیط Dev همه باید WebP باشن. الان حتی اونایی که 
+
+[fa=6 la=2 charFa=20 charLa=7 lock=true]
+Copy box هم باید بره راست — الان چپه.
+
+[fa=25 la=12 charFa=83 charLa=71 lock=true]
+d) Approved the plan with: **"اره شروع کن لیست تسکها رو هم برام جلو روم بذار که ببینم مرحله به مرحله تو کدوم بخش هستیم که تسک رو بهتر track کنم"** (start; also surface a step-by-step task list for tracking).
+
+[fa=7 la=2 charFa=27 charLa=15 lock=true]
+Engine structure فهمیدم. استایل‌های موجود چک می‌کنم.
+
+[fa=10 la=5 charFa=46 charLa=34 lock=true]
+Answering your earlier question "«درجا نشستن روی VS Code» را چطور پیاده کنم؟": اسکریپت محلی (پیشنهادی)
+
+[fa=10 la=3 charFa=30 charLa=19 lock=true]
+Internal Server Error از سمت سروره — دارم ریشه‌ش رو پیدا می‌کنم.
+
+[fa=10 la=3 charFa=38 charLa=28 lock=true]
+- `pnpm add dompurify` (تنها وابستگی جدید؛ `marked@18` از قبل هست). | - helper کوچک در همان فایل:
+
+[fa=6 la=3 charFa=24 charLa=15 lock=true]
+Empty output غیرمنتظره. از روت repo بررسی می‌کنم.
+
+[fa=7 la=2 charFa=21 charLa=12 lock=true]
+Unused widget پاک می‌کنم، بعد خلاصه می‌دم.
+
+[fa=8 la=3 charFa=22 charLa=14 lock=true]
+Pouya Eti Arcade رو از برنامه و فایل‌ها حذف کن
+
+[fa=8 la=2 charFa=26 charLa=19 lock=true]
+Proxy request را به POST تبدیل می‌کند. دوباره با GET صریح:
+
+[fa=7 la=2 charFa=29 charLa=22 lock=true]
+Fix pushed (`bc8175d`). درگ غیرفعال شد، درخت تمیز، همگام با `origin/main`.
+
+[fa=7 la=3 charFa=27 charLa=21 lock=true]
+npm auth `whoami` = amir83nasr (کاره انتشار همین است). انجام می‌دهم:
+
+[fa=4 la=2 charFa=20 charLa=14 lock=true]
+Structure check — میرسم سراغ دایرکتوری وب.
+
+[fa=4 la=2 charFa=13 charLa=7 lock=true]
+Core fix شد. حالا پیام خطا.
+
+[fa=5 la=2 charFa=18 charLa=12 lock=true]
+Prettier warn روی ۱۸ فایل — فیکس می‌کنم.
+
+[fa=7 la=3 charFa=26 charLa=20 lock=true]
+Engine sheet structure دستمه. استایل‌های موجود چک می‌کنم.
+
+[fa=6 la=2 charFa=18 charLa=13 lock=true]
+Share function پیدا شد. فایل‌ها می‌خونم.
+
+[fa=5 la=2 charFa=19 charLa=15 lock=true]
+## ۲) VS Code extension — بله، تب و سشنلیست داره
+
+[fa=4 la=2 charFa=14 charLa=10 lock=true]
+Need return خروجی گسترش می‌دم.
+
+[fa=20 la=5 charFa=72 charLa=69 lock=true]
+sheet/sidebar diff revert شد. دیفالت سالم بود. | `LogoutProvider` بالای Sheet موبایل اضافه شد. بستن شیت children را unmount می‌کرد، تایمر دراور خروج می‌مرد. | typecheck/lint پاس شد.
+
+[fa=4 la=2 charFa=13 charLa=10 lock=true]
+Fix helpers + همه دکمه‌ها یکجا.
+
+[fa=7 la=2 charFa=20 charLa=17 lock=true]
+Migration runner پیدا شد — وضعیت DB را چک می‌کنم.
+
+[fa=7 la=3 charFa=21 charLa=19 lock=true]
+Index reset شد. حالا فقط hunkهای خودم stage می‌شود:
+
+[fa=8 la=4 charFa=36 charLa=34 lock=true]
+```python | raise RuntimeError(f"بارگذاری فایل در فضای ذخیره‌سازی ناموفق بود: {exc}") from exc | ```
+
+[fa=6 la=2 charFa=17 charLa=16 lock=true]
+`prettier --check .` کلین، `www` بیلد و سرو می‌شه (200).
+
+[fa=11 la=4 charFa=37 charLa=37 lock=true]
+Title screen رندر شد (hero-slot + bgm). حالا screenshot واقعی با WebGL برای دیدن پس‌زمینه و مکعب:
+
+[fa=16 la=5 charFa=51 charLa=51 lock=true]
+`[503] Endpoint is unavailable.` از خود opencode می‌آید (سمت upstream). fallback کامبو به مدل بعدی می‌رود، ولی این یکی باگ ۱۰Router نیست.
+
+[fa=5 la=2 charFa=12 charLa=15 lock=true]
+Fixes done. Import گم‌شده چک می‌کنم.
+
+[fa=4 la=2 charFa=17 charLa=26 lock=true]
+Attribution trailer اضافه نشد (طبق CLAUDE.md سراسری).
+
+[fa=7 la=3 charFa=21 charLa=34 lock=true]
+Engine DOM structure check می‌کنم — کلاس‌های search/sheet رو پیدا کنم.
+
+[fa=169 la=73 charFa=619 charLa=634 lock=true]
+6. All user messages: |    - "ببین یه تغییر بزرگ برای بحث ذخیره سازی عکسها تو سامانه داشته باشیم الان ما آواتار و تصاویر بنر و تصاویر سالنها رو داریم الان مدل ذخیره سازی رو بررسی میکنی که چجوری هست ؟؟\nمیخوام سه نوع تو سه پوشه متفاوت ذخیره بشن و همچنین مدل حذف ع
+
+[fa=44 la=16 charFa=179 charLa=197 lock=true]
+- `6263b5f` — `fix(pwa): make account and bookings usable offline` — هسته (هوک آنلاین، کش آفلاین، بنر)، `isOfflineError`/`OFFLINE_MESSAGE`، بازگرداندن آخرین کاربر در `/me`، توقف redirect در AuthGuard، کش رزروها و بنر/حالت خالی آفلاین، بلاک پرداخت و لغو آفلاین،
+
+[fa=36 la=18 charFa=149 charLa=170 lock=true]
+6. All user messages: |    - "داخل بخش تنظیمات سالن امکان گذاشتن شماره تماس با شروع ۰۲۵ هم باشه شماره ثابت قم مثل ۰۲۵۳۶۶۳۵۱۶۲" |    - (AskUserQuestion answer) "فقط شماره تماس سالن" |    - "داخل input بیشتر از ۱۱ رقم نشه وارد کرد متن placeholder هم کلمه یا باید بین د
+
+[fa=8 la=4 charFa=22 charLa=45 lock=true]
+Vendors page diff همش مال منه — کل فایل stage می‌شود. navigation.ts با backup/restore:
+
+[fa=10 la=2 charFa=43 charLa=75 lock=true]
+[site-footer.tsx:12](components/public/site-footer.tsx#L12) — added `/^\/vendors$/` to `HIDE_FOOTER_ON_MOBILE`. فوتر صفحه جستجو در موبایل مخفی شد، دسکتاپ بدون تغییر.
+
+[fa=73 la=10 charFa=324 charLa=371 lock=true]
+The approved plan I presented verbatim: |    > 1. **سه پوشه**: `avatars/`، `banners/`، `vendors/`. قابلیت آپلود عکس صفحه ورود کامل حذف میشه و صفحههای login/register/otp عکس ثابت `/images/futsal.svg` میگیرن. حذف: اندپوینتهای hero تو admin.py، `/settings/public/he
+
+[fa=25 la=8 charFa=81 charLa=152 lock=true]
+**۵) Build:** | ```bash | cd frontend | npx @bubblewrap/cli init --manifest https://toopset.ir/manifest.webmanifest | ``` | به سوال JDK جواب **Y** بده — خودش JDK 17 را در `~/.bubblewrap` نصب می‌کند، نیازی به دست‌زدن به JDK 25 سیستم نیست. Android SDK را هم خودش می‌آورد. 
+
+[fa=40 la=20 charFa=142 charLa=214 lock=true]
+- [game.js](game.js): mobile dpr از 1.75 به 1.5، پیکسل کمتر، GPU سبک‌تر. | - [game.js](game.js): idle throttle از 33 به 50ms، wake از 100 به 200ms، فریم پس‌زمینه کمتر. | - [game.js](game.js): واکنش افت فریم از 1.2 به 0.6s، کاهش dpr زودتر. | - [game.js](game.js): آپل
+
+[fa=29 la=11 charFa=109 charLa=187 lock=true]
+1. npmjs.com → package `@amir83nasr/dsh-rastin` → Settings → **Trusted Publisher** → GitHub Actions: |    - Organization/user: `Amir83Nasr` |    - Repository: `dsh-rastin` |    - Workflow filename: `release.yml` (فقط نام فایل) | 2. این اتصال باید **تا ۲ روز** اولین pu
+
+[fa=16 la=8 charFa=69 charLa=149 lock=true]
+- **`frontend/lib/notifications.ts`** — added to the "حساب و مجموعه" group after `vendor_rejected`: |      ```ts |      vendor_ownership_received: { |        label: "انتقال مالکیت به شما", |        color: "success", |        group: "حساب و مجموعه", |      }, |      vendor_o
+
+[fa=11 la=4 charFa=41 charLa=139 lock=true]
+async def vendor_ownership_released(self, manager_id: int, vendor_name: str) -> None: |          await self.create( |              user_id=manager_id, |              type_="vendor_ownership_released", |              message=f"مالکیت مجموعه «{vendor_name}» از شما گرفته
+
+[fa=16 la=5 charFa=53 charLa=179 lock=true]
+``` | upload root: /Users/amir/Projects/ToopSet/uploads | vendor_images  rows= 34  local= 34  remote=0  non-webp=0 | avatars        rows=  1  local=  1  remote=0  non-webp=0 | homepage_banners: {}          (بنری ست نشده) | files on disk: 4 — همه .webp، بدون فایل یتیم | ``
+
+[fa=51 la=21 charFa=211 charLa=416 lock=true]
+- **Open in New Tab**: `Cmd+Shift+Esc` / `Ctrl+Shift+Esc`. هر مکالمه history/context مستقل داره. | - **Open in New Window** از command palette. | - **Sessions list**: آیکون Spark در Activity Bar → لیست سشنها. کلیک → تب کامل در editor. بخش Session history: جستجو، r
+
+[fa=31 la=15 charFa=106 charLa=338 lock=true]
+- `body = await request.json()` | - کلید داخلی: `getApiKeys()` از `@/lib/localDb`؛ اگر لیست خالی بود یک‌بار `createApiKey("Default Key", await getConsistentMachineId())` بسازد (همان auto-provision موجود در `EndpointPageClient.tsx:94`). | - `Request` تازه بسازد: `n
+
+[fa=39 la=14 charFa=172 charLa=415 lock=true]
+```jsonc | "env": { |   "CLAUDE_CODE_FORK_SUBAGENT": "1",                  // subagent در حالت fork با context کامل (پیشفرض روشن) |   "CLAUDE_CODE_ENABLE_PROMPT_SUGGESTION": "1",       // پیشنهاد پرامپت بعدی در input |   "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",   

@@ -13,3 +13,6 @@ pnpm-lock.yaml
 .prettierignore
 .prettierrc.json
 AGENTS.md
+scripts/**
+.scratch/**
+CLAUDE.md

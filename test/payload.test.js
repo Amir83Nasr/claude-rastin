@@ -21,7 +21,7 @@ test('build always ships the auto-direction installer', () => {
   assert.ok(payload.js.includes('BLOCK_SELECTOR'));
   assert.ok(payload.js.includes('__rastinDirection'));
   assert.match(payload.css, /--rastin-font-weight:\s*400/);
-  assert.match(payload.css, /--rastin-line-height:\s*1\.5/);
+  assert.match(payload.css, /--rastin-line-height:\s*2/);
 });
 
 test('the composer rule matches plaintext-only contenteditable', () => {
@@ -66,7 +66,7 @@ test('the question panel is oriented like message prose', () => {
 test('invalid user values fall back instead of leaking into CSS', () => {
   const payload = build({ root, fontWeight: 'bold;}', lineHeight: NaN });
   assert.match(payload.css, /--rastin-font-weight:\s*400/);
-  assert.match(payload.css, /--rastin-line-height:\s*1\.5/);
+  assert.match(payload.css, /--rastin-line-height:\s*2/);
 });
 
 test('bundled font assets exist', () => {
@@ -115,7 +115,13 @@ test('font family, code family, and size land in the variables', () => {
 });
 
 test('no size override means the host size stays', () => {
-  assert.equal(build({ root }).css.includes('--vscode-chat-font-size'), false);
+  const css = build({ root }).css;
+  assert.equal(css.includes('--vscode-chat-font-size'), false);
+  // 0 is the documented "keep the host size" value, not an 8px request.
+  assert.equal(
+    build({ root, fontSize: 0 }).css.includes('--vscode-chat-font-size'),
+    false,
+  );
 });
 
 test('a family name cannot inject CSS', () => {
@@ -159,7 +165,9 @@ test('theme claude adds its palette, vscode leaves colors alone', () => {
 test('explicit claude themes ignore the VS Code light/dark class', () => {
   const dark = build({ root, theme: 'claude-dark' }).css;
   assert.equal(dark.includes('body.vscode-light'), false);
-  assert.match(dark, /:root:not\(\[class\*="high-contrast"\]\),/);
+  // The palette lands on <body>, where VS Code puts the theme and
+  // high-contrast classes; `:root` would never see them.
+  assert.match(dark, /body:not\(\[class\*="high-contrast"\]\) \{/);
   assert.match(dark, /--app-primary-background: #141413/);
   assert.equal(dark.includes('--app-primary-background: #faf9f5'), false);
 
@@ -204,4 +212,44 @@ test('line height steps by 0.1 in the settings UI', () => {
   assert.equal(props['rastin.fontSize'].type, 'integer');
   assert.ok(props['rastin.theme'].enum.includes('claude-dark'));
   assert.ok(props['rastin.theme'].enum.includes('claude-light'));
+});
+
+test('rastin.direction auto leaves every paragraph to the engine', () => {
+  const payload = build({ root, direction: 'auto' });
+  // The engine reads the override; only the build-time assignment is absent.
+  assert.equal(payload.js.includes('globalThis.__rastinForcedDir ='), false);
+  assert.equal(payload.css.includes('/* rastin.direction'), false);
+});
+
+test('rastin.direction rtl pins the engine and the bidi-aware lines', () => {
+  const payload = build({ root, direction: 'rtl' });
+  assert.match(payload.js, /^globalThis\.__rastinForcedDir = 'rtl';/);
+  assert.match(
+    payload.css,
+    /\[class\*='mentionMirror_'\][\s\S]*?direction: rtl !important;/,
+  );
+  // Roots start from the stylesheet, so a forced chat is pinned before the
+  // observer's first pass instead of flashing the auto RTL/ltr default.
+  assert.match(
+    payload.css,
+    /\[data-testid='assistant-message'\] \[class\*='root_'\],[\s\S]*?direction: rtl !important;/,
+  );
+  // Code and tool islands must stay LTR: the forced rule names prose seats,
+  // composer, and panels only.
+  const marker = payload.css.indexOf('/* rastin.direction: rtl */');
+  const forced = payload.css.slice(marker);
+  assert.equal(forced.includes("[class*='toolUse_']"), false);
+  assert.equal(forced.includes('codeBlockWrapper_'), false);
+});
+
+test('rastin.direction ltr also moves the "Other" placeholder left', () => {
+  const payload = build({ root, direction: 'ltr' });
+  assert.match(payload.js, /^globalThis\.__rastinForcedDir = 'ltr';/);
+  assert.match(payload.css, /\[class\*='otherInput_'\][\s\S]*?left: 8px;/);
+});
+
+test('an unknown direction value falls back to auto', () => {
+  const payload = build({ root, direction: 'sideways' });
+  assert.equal(payload.js.includes('globalThis.__rastinForcedDir ='), false);
+  assert.equal(payload.css.includes('/* rastin.direction'), false);
 });

@@ -8,8 +8,9 @@ calls, and command rows stay left-to-right.
 
 Like the [Rastin DSH bundle](https://github.com/Amir83Nasr/dsh-rastin), this is a
 layout layer — it does not touch Claude's behavior, auth, or files outside
-Claude Code's own webview assets. Direction is always automatic; there is no
-RTL/LTR switch to manage.
+Claude Code's own webview assets. Direction is automatic by default;
+`rastin.direction` can pin the whole chat to RTL or LTR when you would rather
+not have it decided per paragraph.
 
 ## What it does
 
@@ -30,6 +31,9 @@ RTL/LTR switch to manage.
     vote and never locks: the words after its separator decide, and a Persian
     word anywhere later keeps the paragraph RTL (`Note: run the tests لطفا`).
   - A stale LTR lock is dropped when a reused node now starts in Persian.
+  - `rastin.direction: rtl | ltr` skips the detection entirely and pins every
+    message, question/permission panel, todo line, and the composer; code
+    blocks, tool rows, and command rows stay LTR either way.
   - List markers follow the list direction; a mixed-script item keeps its
     marker inside so it does not stay on the wrong side.
 - **Arrow mirroring** — `← → ⇐ ⇒` in an RTL paragraph point the RTL way; copy
@@ -94,11 +98,12 @@ the staged files, and pushes run the same `format:check` + `test` gates as CI.
 | Setting                 | Values                                               | Default             |
 | ----------------------- | ---------------------------------------------------- | ------------------- |
 | `rastin.enabled`        | `true` / `false`                                     | `true`              |
+| `rastin.direction`      | `auto` / `rtl` / `ltr`                               | `auto`              |
 | `rastin.fontWeight`     | `200` – `700`                                        | `400`               |
-| `rastin.fontFamily`     | installed family name                                | bundled IranYekanX  |
+| `rastin.fontFamily`     | installed family name                                | `IRANYekanX`        |
 | `rastin.fontFile`       | absolute `.woff2`/`.woff`/`.ttf`/`.otf` path         | bundled IranYekanX  |
-| `rastin.fontSize`       | `0` (host size) or `8` – `32` px                     | `0`                 |
-| `rastin.lineHeight`     | `1.2` – `2.4`, 0.1 steps                             | `1.5`               |
+| `rastin.fontSize`       | `0` (host size) or `8` – `32` px                     | `13`                |
+| `rastin.lineHeight`     | `1.2` – `2.4`, 0.1 steps                             | `2`                 |
 | `rastin.codeFontFamily` | installed family name                                | VS Code editor font |
 | `rastin.theme`          | `vscode` / `claude` / `claude-light` / `claude-dark` | `vscode`            |
 
@@ -133,8 +138,8 @@ High-contrast themes are never repainted: every palette rule is scoped with
 Settings apply on change: Rastin re-patches the webview and reloads the chat
 webview in place, so no window reload is needed.
 
-The status bar item opens the Rastin menu (settings, repair, enable/disable).
-It shows no mode because direction is automatic.
+The status bar item opens the Rastin menu (settings, repair, enable/disable);
+its tooltip names the current direction mode (automatic or forced).
 
 ## Scope
 

@@ -10,6 +10,26 @@ before tagging.
 
 ## [Unreleased]
 
+### Changed
+
+- Defaults: `rastin.fontFamily` is `IRANYekanX`, `rastin.fontSize` is `13`,
+  and `rastin.lineHeight` is `2`.
+
+## [0.3.0] - 2026-10-23
+
+### Added
+
+- `rastin.direction`: `auto` (default, per-paragraph detection), or `rtl` /
+  `ltr` to pin the whole chat — messages, question and permission panels,
+  todo lines, and the composer — to one direction. Code blocks, tool rows,
+  and command rows stay LTR in every mode.
+
+### Fixed
+
+- `rastin.fontSize: 0` (the default) no longer forces an 8px chat size; it
+  keeps Claude Code's own size as documented.
+- Question preview blocks align to their own direction.
+
 ## [0.2.9] - 2026-10-23
 
 ### Changed

@@ -18,6 +18,7 @@
 const RTL_RANGE =
   /[\u0590-\u05FF\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB1D-\uFDFF\uFE70-\uFEFF]/;
 const LTR_RANGE = /[A-Za-z\u00C0-\u024F\u0370-\u03FF\u0400-\u04FF]/;
+const LETTER = /\p{L}/u;
 
 const MIN_LTR_WORDS = 2;
 const SCAN_CHARS = 2000;
@@ -28,8 +29,47 @@ const SCAN_TOKENS = 48;
 // "skipped: 2 files", "خطا: API key is invalid", "foo.ts — توضیح". Claude
 // writes labels in markdown too ("**Note:** ...", "- Note: ...", "### Note:"),
 // so list/heading/emphasis wrappers are part of the label.
-const LEADING_LABEL =
-  /^\s*(?:(?:[-*+>]|#{1,6}|\d{1,3}[.)])\s+)?(?:\*\*|__|[*_`])?\s*(?:\p{L}[\p{L}\p{N}._/-]{0,39}|\d{1,3}[.)]?)(?:\s+\d{1,3}[.)]?)?\s*(?:\*\*|__|[*_`])?\s*(?:[:：]|[—–|]|-(?=\s))[\s*_`~]*/u;
+const PLAIN_LABEL =
+  /^(?:\*\*|__|[*_`])?\s*(?:\p{L}[\p{L}\p{N}._/-]{0,39}|\d{1,3}[.)]?)(?:\s+\d{1,3}[.)]?)?\s*(?:\*\*|__|[*_`])?\s*(?:[:：]|[—–|]|-(?=\s))[\s*_`~]*/u;
+
+// Wrappers before the content proper: a list or heading marker and a task
+// checkbox ("- [x] ..."). They are syntax, not words, so they never vote.
+const BLOCK_START =
+  /^\s*(?:(?:[-*+>]|#{1,6}|\d{1,3}[.)])\s+)?(?:\[[ xX]\]\s+)?/;
+
+// What turns a heading into a label rather than prose. A backtick is not
+// consumed: in "**Note**: `cmd` و ..." it opens the code span that follows.
+const SEPARATOR = /^\s*(?:[:：]|[—–|]|-(?=\s))[\s*_~]*/;
+
+// A wrapped label: `code`, [link](url), or **bold**. Unlike a plain label it
+// may hold several words, so a bold heading ("**Open in New Tab**:") leaves
+// the verdict to the prose after it instead of locking its own script.
+const WRAPPED_LABELS = [
+  /^`[^`\n]{1,80}`/,
+  /^\[[^\]\n]{1,80}\]\([^)\n]{0,300}\)/,
+  /^(?:\*\*|__)[^\n]{1,80}?(?:\*\*|__)/,
+];
+
+// A wrapped label may carry its separator inside the wrapper ("**Note:**").
+const LABEL_ENDS_IN_SEPARATOR = /[:：—–|]\s*$/;
+
+// Code never votes for prose: a command reads left-to-right, and a Persian
+// sentence that opens with one is still Persian. Fences are removed whole,
+// and an unterminated fence or span (mid-stream) is dropped to end of line.
+const FENCED_CODE = /```[\s\S]*?```/g;
+const FENCE_OPEN = /```[\s\S]*$/;
+const INLINE_CODE = /`[^`\n]*`/g;
+const INLINE_CODE_OPEN = /`[^`\n]*$/;
+const LINK_DESTINATION = /\]\([^)\n]*\)/g;
+
+// Emphasis delimiters are markup, not words: keep what they wrap, drop the
+// markers. Underscores stay inside identifiers ("FOO_BAR"), so only a pair
+// that brackets a whole word is stripped.
+const BOLD_PAIR =
+  /(?<![\p{L}\p{N}])(?:\*\*|__)(?=\S)([^\n]{1,400}?)(?<=\S)(?:\*\*|__)(?![\p{L}\p{N}])/gu;
+const ITALIC_PAIR =
+  /(?<![\p{L}\p{N}])_(?=\S)([^\n]{1,400}?)(?<=\S)_(?![\p{L}\p{N}])/gu;
+const ASTERISK = /\*/g;
 
 // One token: a letter-led run that keeps identifier punctuation inside, so
 // "use-online-status.ts" is one word, not four. It also keeps URLs,
@@ -49,10 +89,66 @@ function isTechnical(token) {
 }
 
 function stripLeadingLabel(text) {
-  const match = LEADING_LABEL.exec(text);
-  if (match === null) return text;
-  const rest = text.slice(match[0].length);
-  return rest.trim() === '' ? text : rest;
+  const plain = PLAIN_LABEL.exec(text);
+  if (plain !== null) {
+    const rest = text.slice(plain[0].length);
+    if (rest.trim() !== '') return { text: rest, labeled: true };
+  }
+  for (const wrapped of WRAPPED_LABELS) {
+    const match = wrapped.exec(text);
+    if (match === null) continue;
+    let rest = text.slice(match[0].length);
+    const separator = SEPARATOR.exec(rest);
+    // `[file](url) — توضیح`, `**Note:** توضیح`, and `**Open in New Tab**: ...`
+    // all head their block; a wrapper with no separator is content, not a
+    // heading (`**Fix the bug** کن` stays an English opening).
+    if (separator === null && !LABEL_ENDS_IN_SEPARATOR.test(match[0])) continue;
+    if (separator !== null) rest = rest.slice(separator[0].length);
+    if (rest.trim() === '') return { text, labeled: false };
+    return { text: rest, labeled: true };
+  }
+  return { text, labeled: false };
+}
+
+// Code is not prose in either script: a command opening a Persian sentence
+// ("`pnpm test` را اجرا کن") must not start an English run, and its Latin
+// words must not lock the block LTR. Fences go first so the ``` markers and
+// their body disappear as one unit; an unterminated fence or span (a block
+// still streaming) is dropped to the end of the line.
+function stripCode(text) {
+  return text
+    .replace(FENCED_CODE, ' ')
+    .replace(FENCE_OPEN, ' ')
+    .replace(INLINE_CODE, ' ')
+    .replace(INLINE_CODE_OPEN, ' ');
+}
+
+// The rest is markup, not words: emphasis markers, a link's URL, and stray
+// `*` (list bullets were consumed above). Stripping the markers keeps the
+// text they wrap, so a bold heading still reads in its own script.
+function stripMarkup(text) {
+  return text
+    .replace(BOLD_PAIR, '$1')
+    .replace(ITALIC_PAIR, '$1')
+    .replace(ASTERISK, '')
+    .replace(LINK_DESTINATION, ' ');
+}
+
+/**
+ * What the verdict reads: block markers, a leading label, and markup gone.
+ * A block that is nothing but code falls back to the code itself, so a pure
+ * fence or command still gets a verdict of its own.
+ */
+function readBlock(text) {
+  const start = BLOCK_START.exec(text);
+  const content = start === null ? text : text.slice(start[0].length);
+  const leading = stripLeadingLabel(content);
+  const markup = stripMarkup(leading.text);
+  const prose = stripCode(markup);
+  return {
+    text: LETTER.test(prose) ? prose : markup,
+    labeled: leading.labeled,
+  };
 }
 
 // ── DETECTION ───────────────────────────────────────────────────────────
@@ -63,21 +159,23 @@ function stripLeadingLabel(text) {
  * Persian word anywhere before that run ends keeps the seat RTL. Technical
  * tokens (file names, paths, camelCase, ALL_CAPS constants) are neutral:
  * Claude writes "use-online-status.ts — هوک ..." and the file name must not
- * start an English run. A leading label in any script ("skipped:", "Note:",
- * "خطا:", "foo.ts —") is metadata, not prose, so the words after it decide.
+ * start an English run. Code (inline spans and fences) and markup never
+ * vote, so a Persian line that opens with `pnpm test`, a filename in
+ * backticks, a link, or bold text still reads RTL. A leading label in any
+ * script ("skipped:", "Note:", "خطا:", "foo.ts —") is metadata, not prose,
+ * so the words after it decide.
  * @param {string} text seat textContent.
  * @returns {{dir: 'rtl'|'ltr', locked: boolean}|null} null when no letters yet.
  */
 function detectSeatDir(text) {
-  const stripped = stripLeadingLabel(text);
   // A label can head either script, so it never locks the seat: English
   // after it ("Note: this is a test") stays provisional LTR and a Persian
   // word further in ("Note: run the tests ... و تست شد") still reads RTL.
-  const labeled = stripped !== text;
-  text = stripped;
+  const block = readBlock(text);
+  const prose = block.text;
 
   const tokens = [];
-  for (const match of text.matchAll(TOKEN)) {
+  for (const match of prose.matchAll(TOKEN)) {
     if (match.index >= SCAN_CHARS || tokens.length >= SCAN_TOKENS) break;
     const token = match[0];
     const dir = RTL_RANGE.test(token)
@@ -92,15 +190,16 @@ function detectSeatDir(text) {
 
   // Ignore identifier-shaped tokens when choosing the opening word; fall
   // back to them for a block that contains nothing but code/file names.
-  const prose = tokens.filter((token) => !token.technical);
-  const words = (prose.length > 0 ? prose : tokens).map((token) => token.dir);
+  const words = tokens.filter((token) => !token.technical);
+  const verdict = (words.length > 0 ? words : tokens).map((token) => token.dir);
 
-  if (words[0] === 'rtl') return { dir: 'rtl', locked: false };
+  if (verdict[0] === 'rtl') return { dir: 'rtl', locked: false };
 
   let run = 0;
-  while (run < words.length && words[run] === 'ltr') run += 1;
-  if (run >= MIN_LTR_WORDS && !labeled) return { dir: 'ltr', locked: true };
-  if (words.includes('rtl')) return { dir: 'rtl', locked: false };
+  while (run < verdict.length && verdict[run] === 'ltr') run += 1;
+  if (run >= MIN_LTR_WORDS && !block.labeled)
+    return { dir: 'ltr', locked: true };
+  if (verdict.includes('rtl')) return { dir: 'rtl', locked: false };
   return { dir: 'ltr', locked: false };
 }
 
@@ -146,6 +245,18 @@ function seatText(seat, limit = SCAN_CHARS) {
  * @returns {'write'|'skip'|undefined} undefined when locked LTR or no letters.
  */
 function orientSeat(seat) {
+  // rastin.direction: rtl/ltr pins every seat, so the chat reads one way
+  // regardless of script. Arrows are still mirrored and the stale-lock
+  // bookkeeping is dropped: nothing can override a forced direction.
+  const forced = globalThis.__rastinForcedDir;
+  if (forced === 'rtl' || forced === 'ltr') {
+    if (seat.hasAttribute?.('data-rastin-dir'))
+      seat.removeAttribute('data-rastin-dir');
+    if (seat.getAttribute('dir') === forced) return 'skip';
+    seat.setAttribute('dir', forced);
+    return 'write';
+  }
+
   const verdict = detectSeatDir(seatText(seat));
   if (verdict === null) return undefined;
 

@@ -98,6 +98,14 @@ samp,
   direction: ltr;
 }
 
+/* The question preview pane renders markdown outside every message root, so
+   its blocks need the same start alignment (the direction comes from their
+   own dir attribute). */
+[class*='previewBody_'] [dir='rtl'],
+[class*='previewBody_'] [dir='ltr'] {
+  text-align: start;
+}
+
 /* RTL user bubbles sit on the right, the way an RTL chat reads. The host
    pins the row left with align-items:flex-start; flip the row, not the app. */
 [class*='userMessageContainer_']:has([class*='userMessage_']:dir(rtl)) {

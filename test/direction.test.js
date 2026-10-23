@@ -273,3 +273,38 @@ test('flow arrows mirror inside RTL and restore inside LTR', () => {
   assert.equal(seat.childNodes.length, 1);
   assert.equal(seat.childNodes[0].nodeValue, '← سلام →');
 });
+
+test('a forced direction pins every seat regardless of script', () => {
+  globalThis.__rastinForcedDir = 'rtl';
+  try {
+    const english = fakeSeat('Here is the fix');
+    assert.equal(orientSeat(english), 'write');
+    assert.equal(english.getAttribute('dir'), 'rtl');
+    // No lock is written: the override, not the text, decides.
+    assert.equal(english.getAttribute('data-rastin-dir'), null);
+    assert.equal(orientSeat(english), 'skip');
+
+    const persian = fakeSeat('سلام دنیا');
+    globalThis.__rastinForcedDir = 'ltr';
+    assert.equal(orientSeat(persian), 'write');
+    assert.equal(persian.getAttribute('dir'), 'ltr');
+  } finally {
+    delete globalThis.__rastinForcedDir;
+  }
+});
+
+test('leaving forced mode returns the seat to its own text', () => {
+  const seat = fakeSeat('سلام دنیا');
+  globalThis.__rastinForcedDir = 'ltr';
+  try {
+    assert.equal(orientSeat(seat), 'write');
+    assert.equal(seat.getAttribute('dir'), 'ltr');
+    // No lock is written while forced: the pin, not the text, decided.
+    assert.equal(seat.getAttribute('data-rastin-dir'), null);
+  } finally {
+    delete globalThis.__rastinForcedDir;
+  }
+  // Back in auto the Persian seat flips on its own again.
+  assert.equal(orientSeat(seat), 'write');
+  assert.equal(seat.getAttribute('dir'), 'rtl');
+});

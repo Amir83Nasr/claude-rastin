@@ -21,11 +21,12 @@ let pendingSync;
 
 const DEFAULTS = {
   enabled: true,
+  direction: 'auto',
   fontWeight: 400,
-  fontFamily: '',
+  fontFamily: 'IRANYekanX',
   fontFile: '',
-  fontSize: 0,
-  lineHeight: 1.5,
+  fontSize: 13,
+  lineHeight: 2,
   codeFontFamily: '',
   theme: 'vscode',
 };
@@ -134,14 +135,16 @@ function log(message) {
 
 function updateStatusBar() {
   if (!statusBar) return;
-  const { enabled, fontWeight, lineHeight } = config();
+  const { enabled, direction, fontWeight, lineHeight } = config();
   if (!enabled) {
     statusBar.text = '$(globe) Rastin: Off';
     statusBar.tooltip = 'Rastin is disabled. Click to enable.';
     return;
   }
   statusBar.text = '$(globe) Rastin';
-  statusBar.tooltip = `Rastin: automatic direction, ${fontWeight} weight, line height ${lineHeight}. Click to manage.`;
+  const mode =
+    direction === 'auto' ? 'automatic direction' : `forced ${direction}`;
+  statusBar.tooltip = `Rastin: ${mode}, ${fontWeight} weight, line height ${lineHeight}. Click to manage.`;
 }
 
 // ── COMMANDS ───────────────────────────────────────────────────────────
