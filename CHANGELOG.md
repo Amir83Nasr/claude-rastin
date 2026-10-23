@@ -10,6 +10,8 @@ before tagging.
 
 ## [Unreleased]
 
+## [0.2.8] - 2026-10-23
+
 ### Fixed
 
 - The `★ Insight` header and its `─` footer stay pinned left instead of
@@ -18,6 +20,9 @@ before tagging.
   descriptions, previews, "Other" input, permission prompts) are now
   oriented per line; an RTL option keeps its radio and highlight bar on the
   right.
+- A leading label (`skipped:`, `**Note:**`, `Step 1:`, `foo.ts —`) no longer
+  locks a block to LTR, so a Persian word later in the paragraph still reads
+  RTL.
 
 ## [0.2.7] - 2026-10-22
 
