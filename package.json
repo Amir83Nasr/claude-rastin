@@ -2,7 +2,7 @@
   "name": "claude-rastin",
   "displayName": "Rastin — Persian RTL for Claude Code",
   "description": "IranYekanX face and per-message RTL/LTR direction for Claude Code's chat in VS Code. Code and tool rows stay LTR.",
-  "version": "0.2.9",
+  "version": "0.3.0",
   "publisher": "amir83nasr",
   "license": "MIT",
   "icon": "assets/icon.png",
@@ -57,6 +57,21 @@
           "default": true,
           "description": "Apply the Rastin font and direction rules to Claude Code."
         },
+        "rastin.direction": {
+          "type": "string",
+          "enum": [
+            "auto",
+            "rtl",
+            "ltr"
+          ],
+          "enumDescriptions": [
+            "Decide every paragraph by its first prose word.",
+            "Force the whole chat right-to-left; code and tool rows stay LTR.",
+            "Force the whole chat left-to-right; code and tool rows stay LTR."
+          ],
+          "default": "auto",
+          "description": "Chat direction. `auto` reads each paragraph; `rtl`/`ltr` override it for every message, panel, and the composer, while code blocks and tool rows keep LTR."
+        },
         "rastin.fontWeight": {
           "type": "number",
           "enum": [
@@ -75,13 +90,13 @@
             "Semibold; synthesized from Regular.",
             "Bold (shipped in the bundle)."
           ],
-          "default": 400,
+          "default": 300,
           "description": "Prose weight for Claude Code chat and composer. The bundle ships UltraLight, Light, Regular, and Bold; 500 and 600 are synthesized from Regular."
         },
         "rastin.fontFamily": {
           "type": "string",
-          "default": "",
-          "description": "Font family to use for chat prose, e.g. \"Vazirmatn\". It must already be installed on this machine. Leave empty to use the bundled IranYekanX."
+          "default": "IRANYekanX",
+          "description": "Font family to use for chat prose, e.g. \"Vazirmatn\". It must already be installed on this machine. The default is the bundled IranYekanX."
         },
         "rastin.fontFile": {
           "type": "string",
@@ -90,7 +105,7 @@
         },
         "rastin.fontSize": {
           "type": "integer",
-          "default": 0,
+          "default": 13,
           "minimum": 0,
           "maximum": 32,
           "description": "Chat font size in px (8-32). 0 keeps Claude Code's own size. Arrow keys move in 1px steps."
@@ -112,7 +127,7 @@
             2.3,
             2.4
           ],
-          "default": 1.5,
+          "default": 2,
           "description": "Line height for Claude Code chat prose and composer. Arrow keys move in 0.1 steps."
         },
         "rastin.codeFontFamily": {
@@ -146,7 +161,8 @@
     "format:check": "prettier --check .",
     "test": "node --test",
     "verify": "pnpm format:check && pnpm test",
-    "package": "rm -f ./*.vsix && pnpm exec vsce package"
+    "package": "rm -f ./*.vsix && pnpm exec vsce package",
+    "ship": "bash scripts/ship.sh"
   },
   "packageManager": "pnpm@12.6.0",
   "devDependencies": {
