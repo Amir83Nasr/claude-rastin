@@ -200,6 +200,75 @@ test('a heading label never locks, in markdown or plain form', () => {
   );
 });
 
+test('a multi-word label is a heading, not the opening sentence', () => {
+  table([
+    ['checked or cleaned: بیشتر از صفر', 'rtl'],
+    ['only when checked: این تغییر', 'rtl'],
+    ['backend app main: بررسی', 'rtl'],
+    ['- `language: persian` → اگر پاسخ‌ها را انگلیسی می‌خواهی، نگذار.', 'rtl'],
+    [
+      '- `admin.py:864–867` — `eitaa_id`, description `"شناسه ایتا"`, default `Amir83Nasr`.',
+      'rtl',
+    ],
+    // Four or more words before the separator read as prose, not a label.
+    ['Here is the fix: سلام', 'ltr'],
+  ]);
+  assert.equal(detectSeatDir('checked or cleaned: بیشتر از صفر').locked, false);
+});
+
+test('a Persian-only heading carries the block', () => {
+  table([
+    [
+      '**۱. خطای درگاه** — [messaging_service.py](backend/app/services/m.py)',
+      'rtl',
+    ],
+    ['**تغییر** — [a.ts](a.ts#L1) را ببین', 'rtl'],
+  ]);
+});
+
+test('a quoted Persian phrase in a code span still votes', () => {
+  // The span holds Persian prose, not a command, so dropping it would let
+  // the surrounding Latin words carry the block LTR.
+  table([
+    ['- `ALL_USERS` incl. admin `امیرحسین نصراللهی`/`09306853363`.', 'rtl'],
+    ['`admin.py:874` — legacy `messenger_id` (`نام کاربری قدیمی`).', 'rtl'],
+  ]);
+});
+
+test('a short English opening does not outvote Persian prose', () => {
+  table([
+    ['Site + repo بررسی می‌کنم، بعد هر ۳ تغییر اعمال می‌کنم.', 'rtl'],
+    ['Repo scan پس‌زمینه / موزیک / انیمیشن مکعب.', 'rtl'],
+    ['Proxy request را به POST تبدیل می‌کند. دوباره با GET صریح:', 'rtl'],
+    // A genuinely English-heavy line still locks LTR.
+    ['Here is the fix برای مشکل', 'ltr'],
+  ]);
+  assert.equal(
+    detectSeatDir('Site + repo بررسی می‌کنم، بعد هر ۳ تغییر').locked,
+    false,
+  );
+});
+
+test('a link still streaming never locks the item LTR', () => {
+  // Mid-stream the destination is only part of a token; the URL half must
+  // not pin the list item left before its Persian text arrives.
+  const partial = [
+    '- [backend/app/main.py:161](backend/',
+    '- [backend/app/main.py:161](backend/app/main.py',
+    '- [backend/app/main.py:161](backend/app/main.py#L',
+  ];
+  for (const text of partial) {
+    assert.equal(detectSeatDir(text).locked, false, text);
+  }
+  // The Persian arrives and the item reads RTL.
+  assert.equal(
+    verdict(
+      '- [backend/app/main.py:161](backend/app/main.py#L161): همین کار برای لاگ',
+    ),
+    'rtl',
+  );
+});
+
 // ── MIXED CONTENT ───────────────────────────────────────────────────────
 
 test('a Persian opening word decides, whatever follows', () => {

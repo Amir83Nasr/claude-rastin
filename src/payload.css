@@ -74,18 +74,21 @@ samp,
 }
 
 /* Paragraph blocks carry their own verdict; start alignment follows each
-   block's direction (left for an English paragraph inside a Persian reply). */
-[data-testid='assistant-message'] [dir='rtl'],
-[data-testid='assistant-message'] [dir='ltr'],
-[class*='userMessage_'] [dir='rtl'],
-[class*='userMessage_'] [dir='ltr'],
-[class*='root_'][dir='rtl'],
-[class*='root_'][dir='ltr'],
-[data-engine-markdown='plain'][dir='rtl'],
-[data-engine-markdown='plain'][dir='ltr'],
-[class*='markdownPlain_'][dir='rtl'],
-[class*='markdownPlain_'][dir='ltr'] {
+   block's direction (left for an English paragraph inside a Persian reply).
+   The host sets `unicode-bidi: plaintext` on these same blocks, which makes
+   the browser pick the paragraph direction from the first strong character
+   and ignore our `dir`: "Site + repo بررسی می‌کنم" reads RTL, but plaintext
+   would still align it left. `isolate` hands the base direction back to the
+   attribute. */
+[data-testid='assistant-message'] [dir],
+[class*='userMessage_'] [dir],
+[class*='root_'][dir],
+[class*='previewBody_'] [dir],
+[class*='todoItem_'] [dir],
+[data-engine-markdown='plain'][dir],
+[class*='markdownPlain_'][dir] {
   text-align: start;
+  unicode-bidi: isolate;
 }
 
 [data-testid='assistant-message'] [dir='rtl'],
@@ -98,14 +101,8 @@ samp,
   direction: ltr;
 }
 
-/* The question preview pane renders markdown outside every message root, so
-   its blocks need the same start alignment (the direction comes from their
-   own dir attribute). */
-[class*='previewBody_'] [dir='rtl'],
-[class*='previewBody_'] [dir='ltr'] {
-  text-align: start;
-}
-
+/* The question preview pane renders markdown outside every message root; the
+   rule above already covers its blocks. */
 /* RTL user bubbles sit on the right, the way an RTL chat reads. The host
    pins the row left with align-items:flex-start; flip the row, not the app. */
 [class*='userMessageContainer_']:has([class*='userMessage_']:dir(rtl)) {

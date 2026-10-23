@@ -21,16 +21,26 @@ const LTR_RANGE = /[A-Za-z\u00C0-\u024F\u0370-\u03FF\u0400-\u04FF]/;
 const LETTER = /\p{L}/u;
 
 const MIN_LTR_WORDS = 2;
+// A short English opening does not lock a paragraph whose prose is Persian:
+// "Site + repo بررسی می‌کنم، بعد ..." reads right-to-left. The bar is high
+// (four Persian words and a two-word margin) so mixed English-heavy lines
+// keep their LTR opening.
+const MIN_RTL_WORDS = 4;
+const RTL_MARGIN = 2;
 const SCAN_CHARS = 2000;
 const SCAN_TOKENS = 48;
 
 // A short label at the start of a block, in any script, followed by a colon,
 // an em/en dash, a pipe, or a spaced hyphen. It is a heading, not prose:
-// "skipped: 2 files", "خطا: API key is invalid", "foo.ts — توضیح". Claude
-// writes labels in markdown too ("**Note:** ...", "- Note: ...", "### Note:"),
-// so list/heading/emphasis wrappers are part of the label.
+// "skipped: 2 files", "خطا: API key is invalid", "foo.ts — توضیح". A label
+// may name a thing in a few words ("checked or cleaned: بیشتر از صفر"),
+// because a heading is not a sentence; four or more words read as prose, so
+// "Here is the fix: سلام" keeps its English opening. Claude writes labels in
+// markdown too ("**Note:** ...", "- Note: ...", "### Note:"), so
+// list/heading/emphasis wrappers are part of the label. A leading backtick is
+// not one: it opens a code span, and the span is the label (WRAPPED_LABELS).
 const PLAIN_LABEL =
-  /^(?:\*\*|__|[*_`])?\s*(?:\p{L}[\p{L}\p{N}._/-]{0,39}|\d{1,3}[.)]?)(?:\s+\d{1,3}[.)]?)?\s*(?:\*\*|__|[*_`])?\s*(?:[:：]|[—–|]|-(?=\s))[\s*_`~]*/u;
+  /^(?:\*\*|__|[*_])?\s*(?:\p{L}[\p{L}\p{N}._/-]{0,39}(?:\s+\p{L}[\p{L}\p{N}._/-]{0,39}){0,2}|\d{1,3}[.)]?)(?:\s+\d{1,3}[.)]?)?\s*(?:\*\*|__|[*_])?\s*(?:[:：→←]|[—–|]|-(?=\s))[\s*_~]*/u;
 
 // Wrappers before the content proper: a list or heading marker and a task
 // checkbox ("- [x] ..."). They are syntax, not words, so they never vote.
@@ -39,7 +49,7 @@ const BLOCK_START =
 
 // What turns a heading into a label rather than prose. A backtick is not
 // consumed: in "**Note**: `cmd` و ..." it opens the code span that follows.
-const SEPARATOR = /^\s*(?:[:：]|[—–|]|-(?=\s))[\s*_~]*/;
+const SEPARATOR = /^\s*(?:[:：→←]|[—–|]|-(?=\s))[\s*_~]*/;
 
 // A wrapped label: `code`, [link](url), or **bold**. Unlike a plain label it
 // may hold several words, so a bold heading ("**Open in New Tab**:") leaves
@@ -92,7 +102,7 @@ function stripLeadingLabel(text) {
   const plain = PLAIN_LABEL.exec(text);
   if (plain !== null) {
     const rest = text.slice(plain[0].length);
-    if (rest.trim() !== '') return { text: rest, labeled: true };
+    if (rest.trim() !== '') return { text: rest, labeled: plain[0] };
   }
   for (const wrapped of WRAPPED_LABELS) {
     const match = wrapped.exec(text);
@@ -104,23 +114,29 @@ function stripLeadingLabel(text) {
     // heading (`**Fix the bug** کن` stays an English opening).
     if (separator === null && !LABEL_ENDS_IN_SEPARATOR.test(match[0])) continue;
     if (separator !== null) rest = rest.slice(separator[0].length);
-    if (rest.trim() === '') return { text, labeled: false };
-    return { text: rest, labeled: true };
+    if (rest.trim() === '') break;
+    return { text: rest, labeled: match[0] };
   }
-  return { text, labeled: false };
+  return { text, labeled: null };
 }
 
 // Code is not prose in either script: a command opening a Persian sentence
 // ("`pnpm test` را اجرا کن") must not start an English run, and its Latin
-// words must not lock the block LTR. Fences go first so the ``` markers and
-// their body disappear as one unit; an unterminated fence or span (a block
-// still streaming) is dropped to the end of the line.
+// words must not lock the block LTR. A span that holds Persian letters is a
+// quoted Persian phrase, not a command, so it keeps its vote
+// ("`admin.py:864` — ... `شناسه ایتا برای پشتیبانی`"). Fences go first so the
+// ``` markers and their body disappear as one unit; an unterminated fence or
+// span (a block still streaming) is dropped to the end of the line.
+function codeVote(span) {
+  return RTL_RANGE.test(span) ? span : ' ';
+}
+
 function stripCode(text) {
   return text
     .replace(FENCED_CODE, ' ')
     .replace(FENCE_OPEN, ' ')
-    .replace(INLINE_CODE, ' ')
-    .replace(INLINE_CODE_OPEN, ' ');
+    .replace(INLINE_CODE, codeVote)
+    .replace(INLINE_CODE_OPEN, codeVote);
 }
 
 // The rest is markup, not words: emphasis markers, a link's URL, and stray
@@ -147,10 +163,9 @@ function readBlock(text) {
   const prose = stripCode(markup);
   return {
     text: LETTER.test(prose) ? prose : markup,
-    labeled: leading.labeled,
+    label: leading.labeled,
   };
 }
-
 // ── DETECTION ───────────────────────────────────────────────────────────
 
 /**
@@ -168,11 +183,15 @@ function readBlock(text) {
  * @returns {{dir: 'rtl'|'ltr', locked: boolean}|null} null when no letters yet.
  */
 function detectSeatDir(text) {
-  // A label can head either script, so it never locks the seat: English
-  // after it ("Note: this is a test") stays provisional LTR and a Persian
-  // word further in ("Note: run the tests ... و تست شد") still reads RTL.
+  // A label can head either script, so its Latin words never lock the seat:
+  // English after it ("Note: this is a test") stays provisional LTR and a
+  // Persian word further in ("Note: run the tests ... و تست شد") still reads
+  // RTL. A Persian label carries the block only when nothing else is left to
+  // read ("**۱. خطای درگاه** — [file](...)"), never over its prose
+  // ("خطا: API key is invalid").
   const block = readBlock(text);
   const prose = block.text;
+  const labeled = block.label !== null;
 
   const tokens = [];
   for (const match of prose.matchAll(TOKEN)) {
@@ -186,18 +205,30 @@ function detectSeatDir(text) {
     if (dir === null) continue;
     tokens.push({ dir, technical: dir === 'ltr' && isTechnical(token) });
   }
-  if (tokens.length === 0) return null;
+  if (tokens.length === 0)
+    return labeled && RTL_RANGE.test(block.label)
+      ? { dir: 'rtl', locked: false }
+      : null;
 
   // Ignore identifier-shaped tokens when choosing the opening word; fall
   // back to them for a block that contains nothing but code/file names.
+  // A fallback run is all technical, so it can only suggest LTR: it must
+  // never lock, or a link half-streamed ("- [a.ts](backend/") would pin the
+  // whole item left before its Persian text arrives.
   const words = tokens.filter((token) => !token.technical);
-  const verdict = (words.length > 0 ? words : tokens).map((token) => token.dir);
+  const fallback = words.length === 0;
+  const verdict = (fallback ? tokens : words).map((token) => token.dir);
 
   if (verdict[0] === 'rtl') return { dir: 'rtl', locked: false };
+  if (fallback && labeled && RTL_RANGE.test(block.label))
+    return { dir: 'rtl', locked: false };
 
   let run = 0;
   while (run < verdict.length && verdict[run] === 'ltr') run += 1;
-  if (run >= MIN_LTR_WORDS && !block.labeled)
+  const rtl = verdict.filter((dir) => dir === 'rtl').length;
+  const persianDominates =
+    rtl >= MIN_RTL_WORDS && rtl >= verdict.length - rtl + RTL_MARGIN;
+  if (run >= MIN_LTR_WORDS && !labeled && !fallback && !persianDominates)
     return { dir: 'ltr', locked: true };
   if (verdict.includes('rtl')) return { dir: 'rtl', locked: false };
   return { dir: 'ltr', locked: false };
