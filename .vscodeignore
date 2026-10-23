@@ -10,3 +10,6 @@ logo.jpg
 TODO.md
 pnpm-workspace.yaml
 pnpm-lock.yaml
+.prettierignore
+.prettierrc.json
+AGENTS.md
