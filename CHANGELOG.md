@@ -10,10 +10,28 @@ before tagging.
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-10-23
+
 ### Changed
 
 - Defaults: `rastin.fontFamily` is `IRANYekanX`, `rastin.fontSize` is `13`,
   and `rastin.lineHeight` is `2`.
+
+### Fixed
+
+- A paragraph is right-aligned when its prose is Persian, even if it opens
+  with a short English phrase such as "Site + repo بررسی می‌کنم".
+- A multi-word heading ("checked or cleaned: بیشتر از صفر") is read as a
+  heading, so the Persian after it decides; a heading in Persian only
+  ("**۱. خطای درگاه** — [file](...)") now reads RTL.
+- A line that opens with an inline code span is read by the prose around it,
+  and a code span that quotes Persian keeps its vote
+  (`` `admin.py:864` — `شناسه ایتا` ``).
+- A list item whose link is still streaming is no longer pinned left before
+  its Persian text arrives.
+- Paragraphs keep the direction Rastin detects instead of the host's
+  `unicode-bidi: plaintext` first-strong-character guess, so an RTL paragraph
+  no longer renders left-aligned.
 
 ## [0.3.0] - 2026-10-23
 
