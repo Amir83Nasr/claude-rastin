@@ -10,7 +10,14 @@ before tagging.
 
 ## [Unreleased]
 
-## [0.2.8] - 2026-10-23
+## [0.2.9] - 2026-10-23
+
+### Changed
+
+- The extension is now `amir83nasr.claude-rastin` (was
+  `amir83nasr.rastin-claude-code`) and the packaged `.vsix` is
+  `claude-rastin-X.Y.Z.vsix`. Uninstall the old id before installing this
+  one.
 
 ### Fixed
 

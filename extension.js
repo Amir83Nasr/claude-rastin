@@ -59,9 +59,8 @@ function sync(interactive) {
 
 async function runSync(interactive) {
   const { enabled } = config();
-  const version = vscode.extensions.getExtension(
-    'amir83nasr.rastin-claude-code',
-  )?.packageJSON.version;
+  const version = vscode.extensions.getExtension('amir83nasr.claude-rastin')
+    ?.packageJSON.version;
 
   if (!enabled) {
     const undo = await patch.remove({ payload: buildPayload() });
@@ -163,7 +162,7 @@ async function showMenu() {
       run: () =>
         vscode.commands.executeCommand(
           'workbench.action.openSettings',
-          '@ext:amir83nasr.rastin-claude-code',
+          '@ext:amir83nasr.claude-rastin',
         ),
     },
     {

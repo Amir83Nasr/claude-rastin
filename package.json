@@ -1,8 +1,8 @@
 {
-  "name": "@amir83nasr/claude-rastin",
+  "name": "claude-rastin",
   "displayName": "Rastin — Persian RTL for Claude Code",
   "description": "IranYekanX face and per-message RTL/LTR direction for Claude Code's chat in VS Code. Code and tool rows stay LTR.",
-  "version": "0.2.8",
+  "version": "0.2.9",
   "publisher": "amir83nasr",
   "license": "MIT",
   "icon": "assets/icon.png",

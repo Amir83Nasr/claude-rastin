@@ -69,7 +69,7 @@ when the patch changes.
 Grab the `.vsix` from the [latest release](../../releases/latest), then:
 
 ```sh
-code --install-extension rastin-claude-code-X.Y.Z.vsix
+code --install-extension claude-rastin-X.Y.Z.vsix
 ```
 
 To build it locally:
@@ -77,7 +77,7 @@ To build it locally:
 ```sh
 pnpm install
 pnpm package
-code --install-extension rastin-claude-code-0.2.7.vsix
+code --install-extension claude-rastin-0.2.9.vsix
 ```
 
 Then reload the window once so VS Code picks up the new build. Disable any
