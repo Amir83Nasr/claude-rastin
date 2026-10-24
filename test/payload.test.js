@@ -153,8 +153,8 @@ test('a missing or unsupported font file falls back to IranYekanX', () => {
 
 test('theme claude adds its palette, vscode leaves colors alone', () => {
   const claude = build({ root, theme: 'claude' });
-  assert.match(claude.css, /--app-primary-background: #faf9f5/);
-  assert.match(claude.css, /--app-primary-background: #141413/);
+  assert.match(claude.css, /--app-primary-background: #f9f9f7/);
+  assert.match(claude.css, /--app-primary-background: #151515/);
   assert.match(claude.css, /body\.vscode-light:not/);
   assert.match(claude.css, /body\.vscode-dark:not/);
 
@@ -168,11 +168,11 @@ test('explicit claude themes ignore the VS Code light/dark class', () => {
   // The palette lands on <body>, where VS Code puts the theme and
   // high-contrast classes; `:root` would never see them.
   assert.match(dark, /body:not\(\[class\*="high-contrast"\]\) \{/);
-  assert.match(dark, /--app-primary-background: #141413/);
-  assert.equal(dark.includes('--app-primary-background: #faf9f5'), false);
+  assert.match(dark, /--app-primary-background: #151515/);
+  assert.equal(dark.includes('--app-primary-background: #f9f9f7'), false);
 
   const light = build({ root, theme: 'claude-light' }).css;
-  assert.match(light, /--app-primary-background: #faf9f5/);
+  assert.match(light, /--app-primary-background: #f9f9f7/);
   assert.equal(light.includes('body.vscode-dark'), false);
   assert.equal((light.match(/claude palette/g) || []).length, 1);
 });

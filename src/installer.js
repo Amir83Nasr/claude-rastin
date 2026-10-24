@@ -22,6 +22,8 @@
   // and puts the radio on that side.
   var PANEL_TEXT =
     '[class*="questionHeader_"],' +
+    '[class*="questionTextLarge_"],' +
+    '[class*="optionText_"],' +
     '[class*="navTab_"],' +
     '[class*="optionLabel_"],' +
     '[class*="optionDescription_"],' +

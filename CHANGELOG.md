@@ -10,6 +10,26 @@ before tagging.
 
 ## [Unreleased]
 
+## [0.4.1] - 2026-10-25
+
+### Changed
+
+- Claude light/dark palettes now use the exact design tokens from claude.ai
+  (`data-theme=claude`): neutral gray surfaces, ink-alpha borders, blue links,
+  and Claude's red/yellow/green status colors, instead of approximated ivory.
+
+### Fixed
+
+- An English paragraph that quotes a Persian term ("the old «منوی اصلی»
+  header ...") stays LTR instead of flipping RTL.
+- A code span that quotes Persian no longer swallows the rest of the line.
+- A Persian heading with a parenthesised Latin word no longer counts as a
+  label that carries an English block.
+- The question text itself (`questionTextLarge_`) and plan option text are
+  now oriented per line like the rest of the panel.
+- Question and permission lines honour the direction Rastin detects instead
+  of the host's first-strong-character guess.
+
 ## [0.4.0] - 2026-10-23
 
 ### Changed

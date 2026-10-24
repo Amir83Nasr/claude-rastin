@@ -27,6 +27,12 @@ const MIN_LTR_WORDS = 2;
 // keep their LTR opening.
 const MIN_RTL_WORDS = 4;
 const RTL_MARGIN = 2;
+// The mirror case: a Persian term quoted inside English prose ("the old
+// «منوی اصلی» header") must not drag the paragraph right. The bar is high —
+// eight English words at three times the Persian count — so a Persian
+// sentence that opens in English ("سلام Hello world") keeps its verdict.
+const MIN_LTR_DOMINANT = 8;
+const LTR_RATIO = 3;
 const SCAN_CHARS = 2000;
 const SCAN_TOKENS = 48;
 
@@ -40,7 +46,7 @@ const SCAN_TOKENS = 48;
 // list/heading/emphasis wrappers are part of the label. A leading backtick is
 // not one: it opens a code span, and the span is the label (WRAPPED_LABELS).
 const PLAIN_LABEL =
-  /^(?:\*\*|__|[*_])?\s*(?:\p{L}[\p{L}\p{N}._/-]{0,39}(?:\s+\p{L}[\p{L}\p{N}._/-]{0,39}){0,2}|\d{1,3}[.)]?)(?:\s+\d{1,3}[.)]?)?\s*(?:\*\*|__|[*_])?\s*(?:[:：→←]|[—–|]|-(?=\s))[\s*_~]*/u;
+  /^(?:\*\*|__|[*_])?\s*(?:\p{L}[\p{L}\p{N}._/()-]{0,39}(?:\s+\p{L}[\p{L}\p{N}._/()-]{0,39}){0,2}|\d{1,3}[.)]?)(?:\s+\d{1,3}[.)]?)?\s*(?:\*\*|__|[*_])?\s*(?:[:：→←]|[—–|]|-(?=\s))[\s*_~]*/u;
 
 // Wrappers before the content proper: a list or heading marker and a task
 // checkbox ("- [x] ..."). They are syntax, not words, so they never vote.
@@ -128,7 +134,10 @@ function stripLeadingLabel(text) {
 // ``` markers and their body disappear as one unit; an unterminated fence or
 // span (a block still streaming) is dropped to the end of the line.
 function codeVote(span) {
-  return RTL_RANGE.test(span) ? span : ' ';
+  if (!RTL_RANGE.test(span)) return ' ';
+  // Keep the words, drop the delimiters: a surviving backtick would let the
+  // "unterminated span" rule below swallow the rest of the line.
+  return span.replace(/`/g, ' ');
 }
 
 function stripCode(text) {
@@ -217,18 +226,38 @@ function detectSeatDir(text) {
   // whole item left before its Persian text arrives.
   const words = tokens.filter((token) => !token.technical);
   const fallback = words.length === 0;
-  const verdict = (fallback ? tokens : words).map((token) => token.dir);
 
+  // Nothing but code, file names, and URLs: the shape is LTR, but a Persian
+  // label still carries the block ("**۱. خطای درگاه** — [file](...)"), and
+  // the verdict never locks so the prose can still flip it once it streams in.
+  if (fallback)
+    return labeled && RTL_RANGE.test(block.label)
+      ? { dir: 'rtl', locked: false }
+      : { dir: 'ltr', locked: false };
+
+  const verdict = words.map((token) => token.dir);
+  const rtl = verdict.filter((dir) => dir === 'rtl').length;
+  const ltr = verdict.length - rtl;
+
+  // A Persian term quoted inside English prose ("the old «منوی اصلی» header,
+  // but the new home screen greets with «سلام»") is a seam, not a Persian
+  // sentence: the block reads LTR. Unlocked, so a Persian-heavy continuation
+  // can still flip it.
+  if (ltr >= MIN_LTR_DOMINANT && ltr >= rtl * LTR_RATIO)
+    return { dir: 'ltr', locked: false };
+
+  // No English run yet could lock: a sentence quoted in the other script
+  // ("روی حالت auto mode هی ارور میگیره..." — in auto mode it errors...) is a
+  // Persian sentence that happens to quote English code-speech in the middle.
+  // Treat a leading Persian segment followed by English as Persian, the same
+  // way the user reads it (fa=8 la=61 above).
   if (verdict[0] === 'rtl') return { dir: 'rtl', locked: false };
-  if (fallback && labeled && RTL_RANGE.test(block.label))
-    return { dir: 'rtl', locked: false };
 
   let run = 0;
   while (run < verdict.length && verdict[run] === 'ltr') run += 1;
-  const rtl = verdict.filter((dir) => dir === 'rtl').length;
   const persianDominates =
     rtl >= MIN_RTL_WORDS && rtl >= verdict.length - rtl + RTL_MARGIN;
-  if (run >= MIN_LTR_WORDS && !labeled && !fallback && !persianDominates)
+  if (run >= MIN_LTR_WORDS && !labeled && !persianDominates)
     return { dir: 'ltr', locked: true };
   if (verdict.includes('rtl')) return { dir: 'rtl', locked: false };
   return { dir: 'ltr', locked: false };

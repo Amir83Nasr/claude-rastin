@@ -269,6 +269,33 @@ test('a link still streaming never locks the item LTR', () => {
   );
 });
 
+test('a Persian term quoted in English prose does not flip the block', () => {
+  table([
+    [
+      'Expected failure — the test asserts the old "منوی اصلی" header, but the new home screen greets with "👋 سلام".',
+      'ltr',
+    ],
+    [
+      '**توضیحات ریپو (about):** > 🧩 NINEFOLD — a 3D Sudoku Odyssey · 81 handcrafted levels across nine realms.',
+      'ltr',
+    ],
+    // A Persian opening sentence still wins over English that follows it.
+    [
+      '"روی حالت auto mode هی ارور میگیره برای انجام کار" — in auto mode it keeps erroring while trying to do work.',
+      'rtl',
+    ],
+  ]);
+});
+
+test('a quoted Persian code span in English prose reads LTR', () => {
+  table([
+    [
+      '- The `aria-label="امتیاز مجموعه"` was added so tests can tell the top badge from the review line.',
+      'ltr',
+    ],
+  ]);
+});
+
 // ── MIXED CONTENT ───────────────────────────────────────────────────────
 
 test('a Persian opening word decides, whatever follows', () => {

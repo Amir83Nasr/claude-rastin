@@ -237,6 +237,22 @@ samp,
   text-align: start;
 }
 
+/* The installer gives question and permission lines a dir of their own, same
+   as paragraphs; `plaintext` would ignore it and align by first strong
+   character, so a line that opens with English but reads Persian stays left. */
+[class*='questionHeader_'][dir],
+[class*='questionTextLarge_'][dir],
+[class*='optionText_'][dir],
+[class*='navTab_'][dir],
+[class*='optionLabel_'][dir],
+[class*='optionDescription_'][dir],
+[class*='previewCaption_'][dir],
+[class*='permissionRequestHeader_'][dir],
+[class*='permissionRequestDescription_'][dir],
+[class*='permissionRequestInput_'][dir] {
+  unicode-bidi: isolate;
+}
+
 /* The "Other" answer reuses the message composer's contenteditable input,
    whose placeholder is pinned to the physical left. */
 [class*='otherInput_'] [class*='placeholder_'],
