@@ -10,6 +10,15 @@ before tagging.
 
 ## [Unreleased]
 
+### Changed
+
+- Claude light/dark palettes now match claude.ai's tokens exactly: ivory
+  `#faf9f5` chat surface and `#f5f4ed` sidebar-tone surfaces in light, and
+  `#262624` chat surface with `#1f1e1d` and `#141413` steps in dark. Text, the
+  `#30302e` dark composer, the `#d97757` accent, and link blues use the same
+  values. Previously the dark palette used near-black grays that Claude does
+  not use.
+
 ## [0.4.1] - 2026-10-25
 
 ### Changed
