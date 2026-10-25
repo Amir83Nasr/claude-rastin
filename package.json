@@ -2,7 +2,7 @@
   "name": "claude-rastin",
   "displayName": "Rastin — Persian RTL for Claude Code",
   "description": "IranYekanX face and per-message RTL/LTR direction for Claude Code's chat in VS Code. Code and tool rows stay LTR.",
-  "version": "0.4.2",
+  "version": "0.5.0",
   "publisher": "amir83nasr",
   "license": "MIT",
   "icon": "assets/icon.png",
@@ -49,13 +49,21 @@
         "title": "Rastin: Menu"
       }
     ],
+    "markdown.previewStyles": [
+      "./markdown/preview.css"
+    ],
+    "markdown.previewScripts": [
+      "./markdown/config.js",
+      "./webview/direction.js",
+      "./markdown/preview.js"
+    ],
     "configuration": {
       "title": "Rastin",
       "properties": {
         "rastin.enabled": {
           "type": "boolean",
           "default": true,
-          "description": "Apply the Rastin font and direction rules to Claude Code."
+          "description": "Apply the Rastin font and direction rules to Claude Code, and the direction rules to the Markdown preview."
         },
         "rastin.direction": {
           "type": "string",
@@ -70,7 +78,12 @@
             "Force the whole chat left-to-right; code and tool rows stay LTR."
           ],
           "default": "auto",
-          "description": "Chat direction. `auto` reads each paragraph; `rtl`/`ltr` override it for every message, panel, and the composer, while code blocks and tool rows keep LTR."
+          "description": "Chat and Markdown preview direction. `auto` reads each paragraph; `rtl`/`ltr` override it for every message, panel, and the composer, while code blocks and tool rows keep LTR."
+        },
+        "rastin.markdownPreview": {
+          "type": "boolean",
+          "default": true,
+          "description": "Apply the direction rules to VS Code's built-in Markdown preview. Every paragraph, heading, list item, quote, and table cell is read on its own; code stays LTR."
         },
         "rastin.fontWeight": {
           "type": "number",

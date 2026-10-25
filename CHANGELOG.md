@@ -10,6 +10,23 @@ before tagging.
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-10-26
+
+### Added
+
+- The direction rules now apply to VS Code's built-in Markdown preview: every
+  paragraph, heading, list item, quote, and table cell is read on its own,
+  code stays LTR, and arrows mirror in RTL paragraphs. Quote borders and list
+  markers follow the block's direction, and `rastin.direction: rtl | ltr` pins
+  the whole document. Controlled by the new `rastin.markdownPreview` setting
+  (on by default); the preview keeps VS Code's font, size, and theme.
+
+### Changed
+
+- Releases are distributed as the `.vsix` attached to the GitHub release; there
+  is no VS Code Marketplace publish. Install with
+  `code --install-extension claude-rastin-X.Y.Z.vsix`.
+
 ## [0.4.2] - 2026-10-25
 
 ### Changed

@@ -5,6 +5,9 @@ node_modules/
 *.vsix
 dist/
 
+# ── GENERATED RUNTIME FILES ──────────────────────────────────
+markdown/config.js
+
 # ── OS / EDITOR CLUTTER ──────────────────────────────────────
 .DS_Store
 

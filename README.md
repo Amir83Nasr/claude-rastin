@@ -4,7 +4,8 @@
 
 Persian chat layout for the Claude Code VS Code extension: the IranYekanX face,
 right-to-left prose, and automatic per-paragraph direction. Code blocks, tool
-calls, and command rows stay left-to-right.
+calls, and command rows stay left-to-right. The same direction rules also apply
+to VS Code's built-in Markdown preview.
 
 Like the [Rastin DSH bundle](https://github.com/Amir83Nasr/dsh-rastin), this is a
 layout layer — it does not touch Claude's behavior, auth, or files outside
@@ -43,6 +44,10 @@ not have it decided per paragraph.
 - **RTL user bubbles** sit on the right when their own text is RTL.
 - **Composer** — RTL text entry with bidi-aware (`unicode-bidi: plaintext`)
   rendering.
+- **Markdown preview** — the same per-block direction in VS Code's built-in
+  Markdown preview: every paragraph, heading, list item, quote, and table cell
+  is read on its own, code stays LTR, and arrows mirror in RTL paragraphs. The
+  preview keeps VS Code's own font, size, and theme.
 - **Font controls** — weight, family, font file, size, code font, line height
   and an optional Claude palette are VS Code settings.
 
@@ -73,9 +78,34 @@ checks the bundle for the core names (`root_`, `userMessage_`, `messageInput_`,
 and so on). If one is missing, RTL may not apply to that build, and Rastin
 warns once for it and logs the names in the output channel.
 
+## Markdown preview
+
+VS Code's built-in preview needs no patching: it loads the styles and scripts
+an extension declares. Rastin contributes:
+
+- `markdown/preview.css` through `markdown.previewStyles`: alignment follows
+  each block, code stays LTR, and quote borders and list markers sit on the
+  block's own side;
+- `webview/direction.js` and `markdown/preview.js` through
+  `markdown.previewScripts`: the same engine the chat uses, run over every
+  prose block (`.markdown-body`) and re-run whenever the preview updates.
+
+A preview script cannot read VS Code settings, and contributed paths are
+static. Rastin therefore writes the two values the preview needs
+(`rastin.markdownPreview`, and `rastin.direction`) to `markdown/config.js` when
+it activates. That file is generated, git-ignored, and not shipped in the
+`.vsix`; without it the preview still applies automatic direction. Code stays
+LTR in every mode.
+
+`rastin.direction: rtl | ltr` pins every block and the preview wrapper.
+`rastin.markdownPreview: false` (or the `rastin.enabled` master switch) leaves
+the preview alone. A change applies the next time the preview loads.
+
 ## Install
 
-Grab the `.vsix` from the [latest release](../../releases/latest), then:
+Grab the `.vsix` from the [latest release](../../releases/latest) and install it.
+Rastin is distributed through GitHub releases only; it is not published to the
+VS Code Marketplace.
 
 ```sh
 code --install-extension claude-rastin-X.Y.Z.vsix
@@ -101,22 +131,23 @@ runs both by hand.
 
 Releases are tags: bump `package.json`, move the `Unreleased` notes in
 `CHANGELOG.md` under the new version, then push `vX.Y.Z`. The `Release` workflow
-runs the same checks, publishes the `.vsix` to the VS Code Marketplace (needs the
-`VSCE_PAT` repository secret), and attaches it to a GitHub release.
+runs the same checks and attaches the built `.vsix` to a GitHub release; there
+is no Marketplace publish, so the `.vsix` from the release is the download.
 
 ## Settings
 
-| Setting                 | Values                                               | Default             |
-| ----------------------- | ---------------------------------------------------- | ------------------- |
-| `rastin.enabled`        | `true` / `false`                                     | `true`              |
-| `rastin.direction`      | `auto` / `rtl` / `ltr`                               | `auto`              |
-| `rastin.fontWeight`     | `200` – `700`                                        | `300`               |
-| `rastin.fontFamily`     | installed family name                                | `IRANYekanX`        |
-| `rastin.fontFile`       | absolute `.woff2`/`.woff`/`.ttf`/`.otf` path         | bundled IranYekanX  |
-| `rastin.fontSize`       | `0` (host size) or `8` – `32` px                     | `13`                |
-| `rastin.lineHeight`     | `1.2` – `2.4`, 0.1 steps                             | `2`                 |
-| `rastin.codeFontFamily` | installed family name                                | VS Code editor font |
-| `rastin.theme`          | `vscode` / `claude` / `claude-light` / `claude-dark` | `vscode`            |
+| Setting                  | Values                                               | Default             |
+| ------------------------ | ---------------------------------------------------- | ------------------- |
+| `rastin.enabled`         | `true` / `false`                                     | `true`              |
+| `rastin.direction`       | `auto` / `rtl` / `ltr`                               | `auto`              |
+| `rastin.markdownPreview` | `true` / `false`                                     | `true`              |
+| `rastin.fontWeight`      | `200` – `700`                                        | `300`               |
+| `rastin.fontFamily`      | installed family name                                | `IRANYekanX`        |
+| `rastin.fontFile`        | absolute `.woff2`/`.woff`/`.ttf`/`.otf` path         | bundled IranYekanX  |
+| `rastin.fontSize`        | `0` (host size) or `8` – `32` px                     | `13`                |
+| `rastin.lineHeight`      | `1.2` – `2.4`, 0.1 steps                             | `2`                 |
+| `rastin.codeFontFamily`  | installed family name                                | VS Code editor font |
+| `rastin.theme`           | `vscode` / `claude` / `claude-light` / `claude-dark` | `vscode`            |
 
 `rastin.fontFile` wins over `rastin.fontFamily`: the file is copied into the
 webview next to the bundled faces and used as `RastinUser`, because the webview
@@ -147,7 +178,9 @@ High-contrast themes are never repainted: every palette rule is scoped with
 `:not([class*="high-contrast"])`, so accessibility colors stay the host's.
 
 Settings apply on change: Rastin re-patches the webview and reloads the chat
-webview in place, so no window reload is needed.
+webview in place, so no window reload is needed. The Markdown preview reads its
+settings when it loads, so a direction change reaches it on the next preview
+load.
 
 The status bar item opens the Rastin menu (settings, repair, enable/disable);
 its tooltip names the current direction mode (automatic or forced).
@@ -156,6 +189,8 @@ its tooltip names the current direction mode (automatic or forced).
 
 - Claude Code sidebar/editor chat (`anthropic.claude-code-*`). VS Code, Cursor,
   Antigravity, and Kiro extension directories are scanned.
+- VS Code's built-in Markdown preview, through its contributed styles and
+  scripts. Direction only: the preview keeps its own font, size, and theme.
 - Plan Preview (the separate editor tab) is not patched yet.
 - The patch lives inside Claude Code's extension directory; uninstall or update
   of that extension removes it. `Rastin: Disable` restores the files.

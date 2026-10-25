@@ -47,13 +47,8 @@ jobs:
           ' CHANGELOG.md > notes.md
           test -s notes.md || { echo "no CHANGELOG.md section for $version" >&2; exit 1; }
 
-      # Marketplace first: if it refuses the version, no GitHub release is
-      # created either, so the two never disagree.
-      - name: Publish to the VS Code Marketplace
-        env:
-          VSCE_PAT: ${{ secrets.VSCE_PAT }}
-        run: pnpm exec vsce publish --packagePath "$(ls -1 ./*.vsix | head -1)"
-
+      # The GitHub release is the only distribution channel: the `.vsix` is
+      # attached to it and installed by hand (Rastin is not on the Marketplace).
       - name: Create GitHub release
         env:
           GH_TOKEN: ${{ github.token }}

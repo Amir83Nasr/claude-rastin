@@ -1,0 +1,49 @@
+/* ── MARKDOWN PREVIEW ─────────────────────────────────────────────────── */
+
+/* VS Code wraps the preview in `.markdown-body dir="auto"` and every block
+   gets its own dir from markdown/preview.js, so alignment follows the block
+   rather than the document. The stylesheet is static, so every rule is keyed
+   on the marker the installer sets: with Rastin off (or before the installer
+   reaches the document) the preview keeps the host styles. The `.markdown-body`
+   prefix outranks the host's physical `th { text-align: left }`. */
+.markdown-body[data-rastin-preview]
+  :is(p, li, h1, h2, h3, h4, h5, h6, th, td, dl, dt, dd)[dir] {
+  text-align: start;
+}
+
+/* Lists use logical padding in the host, so they follow their own dir. A
+   mixed-script item keeps its marker inside so it does not sit on the wrong
+   side of the list. */
+.markdown-body[data-rastin-preview] :is(ul, ol)[dir='rtl'] > li[dir='ltr'],
+.markdown-body[data-rastin-preview] :is(ul, ol)[dir='ltr'] > li[dir='rtl'] {
+  list-style-position: inside;
+}
+
+/* The host draws a quote on the physical left. Logical sides follow the
+   blockquote's own dir; `[dir]` keeps the host untouched if the installer
+   never ran. */
+.markdown-body[data-rastin-preview] blockquote[dir] {
+  border-left-width: 0;
+  border-right-width: 0;
+  border-inline-start-width: 5px;
+  border-inline-start-style: solid;
+  padding: 0;
+  padding-inline-start: 10px;
+  padding-inline-end: 16px;
+}
+
+/* ── LTR ISLANDS ──────────────────────────────────────────────────────── */
+
+/* Code reads left-to-right in either script. Isolating it keeps a Latin
+   command's punctuation from jumping to the other end of an RTL line. */
+.markdown-body[data-rastin-preview] :is(pre, code, kbd, samp) {
+  direction: ltr;
+  unicode-bidi: isolate;
+  text-align: left;
+}
+
+/* Arrow mirror spans: RTL paragraphs point arrows the RTL way. */
+[data-rastin-mirror] {
+  display: inline-block;
+  transform: scaleX(-1);
+}

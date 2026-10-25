@@ -3,6 +3,7 @@
 const vscode = require('vscode');
 const patch = require('./lib/patch');
 const payload = require('./lib/payload');
+const preview = require('./lib/preview');
 const { DEFAULTS } = require('./lib/settings');
 const { statusLabel } = require('./lib/status');
 
@@ -40,6 +41,20 @@ function buildPayload() {
   return payload.build({ root: __dirname, ...config() });
 }
 
+// VS Code contributes the Markdown preview scripts statically, so the active
+// settings reach them through a generated file. It is refreshed even when no
+// Claude Code build is installed to patch.
+async function writePreviewConfig(settings) {
+  try {
+    if (await preview.writeConfig({ root: __dirname, ...settings })) {
+      log('markdown preview config updated');
+    }
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    log(`markdown preview config: ${message}`);
+  }
+}
+
 // ── SYNC ───────────────────────────────────────────────────────────────
 
 function sync(interactive) {
@@ -54,7 +69,9 @@ function sync(interactive) {
 }
 
 async function runSync(interactive) {
-  const { enabled } = config();
+  const settings = config();
+  const { enabled } = settings;
+  await writePreviewConfig(settings);
   const version = vscode.extensions.getExtension('amir83nasr.claude-rastin')
     ?.packageJSON.version;
 

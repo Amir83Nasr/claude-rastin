@@ -23,6 +23,7 @@ use PNPM instead of NPM.
 ## RELEASE / PUBLISH (origin)
 
 - Version source: `package.json` (+ lockfile). Every publish to origin ships a version bump (semver).
+- Distribution is the `.vsix` attached to the GitHub release. There is no VS Code Marketplace publish.
 - Steps, in order:
   1. Bump `version` in `package.json` (`pnpm version patch|minor|major --no-git-tag-version`).
   2. Update `CHANGELOG.md`: move `Unreleased` entries into `## [X.Y.Z] - YYYY-MM-DD`.
