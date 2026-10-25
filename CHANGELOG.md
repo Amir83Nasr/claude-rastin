@@ -10,6 +10,8 @@ before tagging.
 
 ## [Unreleased]
 
+## [0.4.2] - 2026-10-25
+
 ### Changed
 
 - Claude light/dark palettes now match claude.ai's tokens exactly: ivory
@@ -18,6 +20,17 @@ before tagging.
   `#30302e` dark composer, the `#d97757` accent, and link blues use the same
   values. Previously the dark palette used near-black grays that Claude does
   not use.
+- Claude Code updates and extension installs or removals re-run the patch
+  automatically, so the manual repair command is rarely needed.
+- A Claude Code build that no longer has the core class names Rastin targets
+  triggers one warning for that build, instead of RTL failing silently.
+
+### Fixed
+
+- The default font weight is Light (300) everywhere. The README and the code's
+  fallback said 400, while the Settings UI already used 300.
+- A partly staged file no longer commits its unstaged changes: the pre-commit
+  hook now runs through `lint-staged`.
 
 ## [0.4.1] - 2026-10-25
 

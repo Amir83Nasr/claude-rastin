@@ -8,7 +8,7 @@ const {
   mirrorSeatArrows,
   orientSeat,
   seatText,
-} = require('../src/direction.js');
+} = require('../webview/direction.js');
 
 test('Persian prose reads RTL', () => {
   assert.deepEqual(detectSeatDir('سلام دنیا'), {

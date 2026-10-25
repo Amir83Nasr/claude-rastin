@@ -3,14 +3,21 @@
 const vscode = require('vscode');
 const patch = require('./lib/patch');
 const payload = require('./lib/payload');
+const { DEFAULTS } = require('./lib/settings');
+const { statusLabel } = require('./lib/status');
 
 const LEGACY_ID = 'yechielby.claude-code-rtl';
 const LEGACY_NAME = 'Claude Code RTL Support';
+// Remembers which Claude Code builds were already warned about, so a build
+// that lacks the core anchors warns once instead of on every startup.
+const UNANCHORED_KEY = 'rastin.unanchoredBuilds';
 
 /** @type {vscode.OutputChannel | undefined} */
 let output;
 /** @type {vscode.StatusBarItem | undefined} */
 let statusBar;
+/** @type {vscode.Memento | undefined} */
+let memento;
 /** @type {Promise<unknown>} */
 let queue = Promise.resolve();
 let warnedLegacy = false;
@@ -18,18 +25,6 @@ let warnedLegacy = false;
 let pendingSync;
 
 // ── CONFIG ─────────────────────────────────────────────────────────────
-
-const DEFAULTS = {
-  enabled: true,
-  direction: 'auto',
-  fontWeight: 400,
-  fontFamily: 'IRANYekanX',
-  fontFile: '',
-  fontSize: 13,
-  lineHeight: 2,
-  codeFontFamily: '',
-  theme: 'vscode',
-};
 
 function config() {
   const settings = vscode.workspace.getConfiguration('rastin');
@@ -85,7 +80,27 @@ async function runSync(interactive) {
   }
   log(`applied (${applied.targets}): ${describe(applied.changed)}`);
   warnFailed(applied.failed, interactive);
+  warnUnanchored(applied.unanchored);
   if (interactive && applied.changed.length > 0) await refreshWebviews();
+}
+
+function warnUnanchored(unanchored) {
+  if (unanchored.length === 0) return;
+  for (const { name, missing } of unanchored) {
+    log(
+      `${name}: core anchors missing (${missing.join(', ')}); RTL may not apply`,
+    );
+  }
+  const warned = new Set(memento?.get(UNANCHORED_KEY, []));
+  const fresh = unanchored.filter(({ name }) => !warned.has(name));
+  if (fresh.length === 0) return;
+  memento?.update(UNANCHORED_KEY, [
+    ...warned,
+    ...fresh.map(({ name }) => name),
+  ]);
+  vscode.window.showWarningMessage(
+    `Rastin: ${fresh.map(({ name }) => name).join(', ')} changed its class names, so RTL may not apply. See the Rastin output channel.`,
+  );
 }
 
 function warnFailed(failed, interactive) {
@@ -135,16 +150,9 @@ function log(message) {
 
 function updateStatusBar() {
   if (!statusBar) return;
-  const { enabled, direction, fontWeight, lineHeight } = config();
-  if (!enabled) {
-    statusBar.text = '$(globe) Rastin: Off';
-    statusBar.tooltip = 'Rastin is disabled. Click to enable.';
-    return;
-  }
-  statusBar.text = '$(globe) Rastin';
-  const mode =
-    direction === 'auto' ? 'automatic direction' : `forced ${direction}`;
-  statusBar.tooltip = `Rastin: ${mode}, ${fontWeight} weight, line height ${lineHeight}. Click to manage.`;
+  const { text, tooltip } = statusLabel(config());
+  statusBar.text = text;
+  statusBar.tooltip = tooltip;
 }
 
 // ── COMMANDS ───────────────────────────────────────────────────────────
@@ -207,6 +215,7 @@ function warnLegacy() {
 
 function activate(context) {
   output = vscode.window.createOutputChannel('Rastin');
+  memento = context.globalState;
   statusBar = vscode.window.createStatusBarItem(
     vscode.StatusBarAlignment.Left,
     100,
@@ -229,6 +238,9 @@ function activate(context) {
       clearTimeout(pendingSync);
       pendingSync = setTimeout(() => sync(true), 250);
     }),
+    // Installing or updating an extension can add a Claude Code build the
+    // patch has not seen. Re-running sync patches it without a manual repair.
+    vscode.extensions.onDidChange(() => sync(false)),
   );
 
   updateStatusBar();

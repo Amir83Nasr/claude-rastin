@@ -3,7 +3,11 @@
 const assert = require('node:assert/strict');
 const test = require('node:test');
 
-const { detectSeatDir, orientSeat, seatText } = require('../src/direction.js');
+const {
+  detectSeatDir,
+  orientSeat,
+  seatText,
+} = require('../webview/direction.js');
 
 // ── HELPERS ─────────────────────────────────────────────────────────────
 

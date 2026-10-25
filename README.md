@@ -64,9 +64,14 @@ previous block instead of stacking. Patches from
 `yechielby.claude-code-rtl` are detected and stripped during migration.
 
 Claude Code updates replace these files, wiping the patch. Rastin re-applies on
-every VS Code startup; for an update during a session, run
-`Rastin: Repair after Claude Code update`. The chat webview reloads itself
-when the patch changes.
+every VS Code startup and whenever an extension is installed, updated, or
+removed, so `Rastin: Repair after Claude Code update` is only needed when that
+does not happen. The chat webview reloads itself when the patch changes.
+
+Rastin's selectors depend on Claude Code's class names. Before patching, it
+checks the bundle for the core names (`root_`, `userMessage_`, `messageInput_`,
+and so on). If one is missing, RTL may not apply to that build, and Rastin
+warns once for it and logs the names in the output channel.
 
 ## Install
 
@@ -81,7 +86,7 @@ To build it locally:
 ```sh
 pnpm install
 pnpm package
-code --install-extension claude-rastin-0.2.9.vsix
+code --install-extension claude-rastin-X.Y.Z.vsix
 ```
 
 Then reload the window once so VS Code picks up the new build. Disable any
@@ -90,8 +95,14 @@ other Claude Code RTL extension first.
 ## Contributing
 
 `pnpm install` sets `core.hooksPath` to `.githooks/`: commits run Prettier on
-the staged files, and pushes run the same `format:check` + `test` gates as CI.
-`pnpm verify` runs both by hand.
+the staged files through `lint-staged`, which leaves unstaged hunks out of the
+commit. Pushes run the same `format:check` + `test` gates as CI. `pnpm verify`
+runs both by hand.
+
+Releases are tags: bump `package.json`, move the `Unreleased` notes in
+`CHANGELOG.md` under the new version, then push `vX.Y.Z`. The `Release` workflow
+runs the same checks, publishes the `.vsix` to the VS Code Marketplace (needs the
+`VSCE_PAT` repository secret), and attaches it to a GitHub release.
 
 ## Settings
 
@@ -99,7 +110,7 @@ the staged files, and pushes run the same `format:check` + `test` gates as CI.
 | ----------------------- | ---------------------------------------------------- | ------------------- |
 | `rastin.enabled`        | `true` / `false`                                     | `true`              |
 | `rastin.direction`      | `auto` / `rtl` / `ltr`                               | `auto`              |
-| `rastin.fontWeight`     | `200` – `700`                                        | `400`               |
+| `rastin.fontWeight`     | `200` – `700`                                        | `300`               |
 | `rastin.fontFamily`     | installed family name                                | `IRANYekanX`        |
 | `rastin.fontFile`       | absolute `.woff2`/`.woff`/`.ttf`/`.otf` path         | bundled IranYekanX  |
 | `rastin.fontSize`       | `0` (host size) or `8` – `32` px                     | `13`                |

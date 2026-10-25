@@ -1,8 +1,8 @@
 /**
  * Webview installer, appended to Claude Code's webview/index.js after
- * src/direction.js. Every paragraph-sized block decides its own direction by
- * its leading word run; the message root only handles bare text. Flow arrows
- * are mirrored per block, so an RTL paragraph never mirrors an LTR one.
+ * webview/direction.js. Every paragraph-sized block decides its own direction
+ * by its leading word run; the message root only handles bare text. Flow
+ * arrows are mirrored per block, so an RTL paragraph never mirrors an LTR one.
  */
 (function () {
   'use strict';

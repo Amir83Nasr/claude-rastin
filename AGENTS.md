@@ -8,14 +8,14 @@ use PNPM instead of NPM.
 
 - Only the current build's `.vsix` may exist in the repo root — delete the previous one whenever a new version is packaged (`pnpm package` already does this via `rm -f ./*.vsix`).
 - `*.vsix` is git-ignored; never commit build output.
+- Package and install the current build with `bash scripts/ship.sh` (or `pnpm ship`).
 
 ## LOCAL VERIFICATION (see a change in VS Code)
 
 - Any change to the extension must be packaged and installed locally so it can
   actually be seen, not just tested.
 - After the change is verified (`pnpm verify`), run `scripts/ship.sh`:
-  it packages the `.vsix`, installs it with `code --install-extension
---force`, and reloads VS Code. `SKIP_RELOAD=1 scripts/ship.sh` only skips
+  it packages the `.vsix`, installs it with `code --install-extension --force`, and reloads VS Code. `SKIP_RELOAD=1 scripts/ship.sh` only skips
   the last step (reload the window by hand).
 - A local install is not a release: bump `version` + `CHANGELOG.md` only when
   publishing to origin (see RELEASE / PUBLISH).
