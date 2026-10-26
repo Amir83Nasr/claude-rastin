@@ -1,7 +1,7 @@
 {
   "name": "claude-rastin",
-  "displayName": "Rastin — Persian RTL for Claude Code",
-  "description": "IranYekanX face and per-message RTL/LTR direction for Claude Code's chat in VS Code. Code and tool rows stay LTR.",
+  "displayName": "Rastin — Persian RTL for Claude Code and Codex",
+  "description": "IranYekanX face and per-message RTL/LTR direction for Claude Code and Codex chats in VS Code. Code and tool rows stay LTR.",
   "version": "0.5.0",
   "publisher": "amir83nasr",
   "license": "MIT",
@@ -23,6 +23,7 @@
     "rtl",
     "bidi",
     "claude-code",
+    "codex",
     "iran-yekan",
     "font"
   ],
@@ -42,7 +43,7 @@
       },
       {
         "command": "rastin.repair",
-        "title": "Rastin: Repair after Claude Code update"
+        "title": "Rastin: Repair after Claude Code or Codex update"
       },
       {
         "command": "rastin.menu",
@@ -63,7 +64,7 @@
         "rastin.enabled": {
           "type": "boolean",
           "default": true,
-          "description": "Apply the Rastin font and direction rules to Claude Code, and the direction rules to the Markdown preview."
+          "description": "Apply the Rastin font and direction rules to the Claude Code and Codex chats, and the direction rules to the Markdown preview and the Office Viewer Markdown editor."
         },
         "rastin.direction": {
           "type": "string",
@@ -78,12 +79,22 @@
             "Force the whole chat left-to-right; code and tool rows stay LTR."
           ],
           "default": "auto",
-          "description": "Chat and Markdown preview direction. `auto` reads each paragraph; `rtl`/`ltr` override it for every message, panel, and the composer, while code blocks and tool rows keep LTR."
+          "description": "Direction for the Claude Code and Codex chats, the Markdown preview, and the Office Viewer. `auto` reads each paragraph; `rtl`/`ltr` override it for every message, panel, and the composer, while code blocks and tool rows keep LTR."
         },
         "rastin.markdownPreview": {
           "type": "boolean",
           "default": true,
           "description": "Apply the direction rules to VS Code's built-in Markdown preview. Every paragraph, heading, list item, quote, and table cell is read on its own; code stays LTR."
+        },
+        "rastin.officeViewer": {
+          "type": "boolean",
+          "default": true,
+          "description": "Apply the direction rules to the Markdown editor of the Office Viewer extension (cweijan.vscode-office), in both WYSIWYG and IR modes. The editor reads the setting when it opens, so reopen the file after a change. Has no effect when that extension is not installed."
+        },
+        "rastin.codex": {
+          "type": "boolean",
+          "default": true,
+          "description": "Apply the Rastin font and direction rules to the Codex extension's chat (openai.chatgpt). Has no effect when Codex is not installed."
         },
         "rastin.fontWeight": {
           "type": "number",
@@ -104,24 +115,24 @@
             "Bold (shipped in the bundle)."
           ],
           "default": 300,
-          "description": "Prose weight for Claude Code chat and composer. The bundle ships UltraLight, Light, Regular, and Bold; 500 and 600 are synthesized from Regular."
+          "description": "Prose weight for the Claude Code and Codex chats and composers. The bundle ships UltraLight, Light, Regular, and Bold; 500 and 600 are synthesized from Regular."
         },
         "rastin.fontFamily": {
           "type": "string",
           "default": "IRANYekanX",
-          "description": "Font family to use for chat prose, e.g. \"Vazirmatn\". It must already be installed on this machine. The default is the bundled IranYekanX."
+          "description": "Font family for the Claude Code and Codex chat prose, e.g. \"Vazirmatn\". It must already be installed on this machine. The default is the bundled IranYekanX."
         },
         "rastin.fontFile": {
           "type": "string",
           "default": "",
-          "description": "Absolute path to a .woff2/.woff/.ttf/.otf file to use as the chat face, for fonts that are not installed. Copied into Claude Code's webview next to the bundled faces."
+          "description": "Absolute path to a .woff2/.woff/.ttf/.otf file to use as the chat face, for fonts that are not installed. Copied into each patched chat's webview next to the bundled faces."
         },
         "rastin.fontSize": {
           "type": "integer",
           "default": 13,
           "minimum": 0,
           "maximum": 32,
-          "description": "Chat font size in px (8-32). 0 keeps Claude Code's own size. Arrow keys move in 1px steps."
+          "description": "Chat font size in px (8-32). 0 keeps the host's own size. Arrow keys move in 1px steps."
         },
         "rastin.lineHeight": {
           "type": "number",
@@ -141,7 +152,7 @@
             2.4
           ],
           "default": 2,
-          "description": "Line height for Claude Code chat prose and composer. Arrow keys move in 0.1 steps."
+          "description": "Line height for the Claude Code and Codex chat prose and composers. Arrow keys move in 0.1 steps."
         },
         "rastin.codeFontFamily": {
           "type": "string",

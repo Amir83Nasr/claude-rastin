@@ -47,6 +47,27 @@ test('insight banners stay left even inside an RTL root', () => {
   assert.match(rule[0], /margin-right: auto;/);
 });
 
+test('a Persian todo list takes its card header with it', () => {
+  // The tool card header is LTR chrome, so "Update Todos" stayed on the left
+  // while an RTL list sat on the right. When every item reads RTL the card is
+  // a Persian list and the header follows; any Latin item keeps the LTR
+  // header. CSS only: the installer's dir attributes flip it as items change.
+  const css = build({ root }).css;
+  const start = css.indexOf("[class*='toolUse_']:has(");
+  assert.ok(start >= 0, 'todo header rule is missing');
+  const rule = css.slice(start, css.indexOf('}', start) + 1);
+  assert.ok(
+    rule.includes("[class*='todoItem_'] [class*='content_'][dir='rtl']"),
+  );
+  assert.ok(rule.includes(':not('));
+  assert.ok(
+    rule.includes("[class*='todoItem_'] [class*='content_'][dir='ltr']"),
+  );
+  assert.ok(rule.includes("[class*='toolSummary_']"));
+  assert.match(rule, /direction: rtl;/);
+  assert.match(rule, /text-align: start;/);
+});
+
 test('the question panel is oriented like message prose', () => {
   // The AskUserQuestion panel renders outside every message root, so its
   // lines need their own seats: the installer must select them, and the

@@ -1,6 +1,8 @@
 'use strict';
 
 const vscode = require('vscode');
+const codex = require('./lib/codex');
+const office = require('./lib/office');
 const patch = require('./lib/patch');
 const payload = require('./lib/payload');
 const preview = require('./lib/preview');
@@ -55,6 +57,66 @@ async function writePreviewConfig(settings) {
   }
 }
 
+// The Office Viewer is a separate install; patching it is independent of
+// Claude Code, so a failure there must not fail the chat patch.
+async function syncOffice(settings, version) {
+  try {
+    // The switch turns the editor back into the stock page: the marked block
+    // and the generated files are removed, so nothing of Rastin is loaded.
+    if (!settings.enabled || settings.officeViewer === false) {
+      return await office.remove();
+    }
+    return await office.apply({ root: __dirname, version, ...settings });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    log(`office viewer: ${message}`);
+    return { targets: 0, changed: [], failed: [] };
+  }
+}
+
+// Codex is another separate install. Its page cannot read VS Code settings
+// either, so the same switch and direction reach it through a generated
+// script of its own.
+async function syncCodex(settings, version) {
+  try {
+    if (!settings.enabled || settings.codex === false) {
+      return await codex.remove();
+    }
+    return await codex.apply({ root: __dirname, version, ...settings });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    log(`codex: ${message}`);
+    return { targets: 0, changed: [], failed: [] };
+  }
+}
+
+// The editor patches are independent of Claude Code and of each other, so
+// they run together and report under their own names.
+async function syncEditors(settings, version) {
+  const [officeResult, codexResult] = await Promise.all([
+    syncOffice(settings, version),
+    syncCodex(settings, version),
+  ]);
+  return [
+    { name: 'office viewer', subject: 'Office Viewer', result: officeResult },
+    { name: 'codex', subject: 'Codex', result: codexResult },
+  ];
+}
+
+function editorTargets(editors) {
+  return editors.reduce((total, { result }) => total + result.targets, 0);
+}
+
+function editorChanges(editors) {
+  return editors.flatMap(({ result }) => result.changed);
+}
+
+function warnEditorFailures(editors, interactive) {
+  for (const { subject, result } of editors) {
+    warnFailed(result.failed, interactive, subject);
+  }
+}
+
 // ── SYNC ───────────────────────────────────────────────────────────────
 
 function sync(interactive) {
@@ -72,33 +134,54 @@ async function runSync(interactive) {
   const settings = config();
   const { enabled } = settings;
   await writePreviewConfig(settings);
-  const version = vscode.extensions.getExtension('amir83nasr.claude-rastin')
-    ?.packageJSON.version;
+  const version =
+    vscode.extensions.getExtension('amir83nasr.claude-rastin')?.packageJSON
+      .version ?? 'dev';
+
+  // The editor patches are independent of Claude Code: they land in whichever
+  // installs exist, and an update there is re-patched too.
+  const editors = await syncEditors(settings, version);
 
   if (!enabled) {
     const undo = await patch.remove({ payload: buildPayload() });
-    if (undo.targets === 0) {
+    if (undo.targets > 0) log(`removed: ${describe(undo.changed)}`);
+    for (const { name, result } of editors) {
+      if (result.targets > 0) {
+        log(`${name} removed: ${describe(result.changed)}`);
+      }
+    }
+    warnFailed(undo.failed, interactive);
+    warnEditorFailures(editors, interactive);
+    if (undo.targets === 0 && editorTargets(editors) === 0) {
       notifyNoTarget();
       return;
     }
-    log(`removed: ${describe(undo.changed)}`);
-    warnFailed(undo.failed, interactive);
-    if (interactive && undo.changed.length > 0) await refreshWebviews();
+    const changed = [...undo.changed, ...editorChanges(editors)];
+    if (interactive && changed.length > 0) await refreshWebviews();
     return;
   }
 
   const applied = await patch.apply({
     payload: buildPayload(),
-    version: version ?? 'dev',
+    version,
   });
-  if (applied.targets === 0) {
+  if (applied.targets > 0) {
+    log(`applied (${applied.targets}): ${describe(applied.changed)}`);
+  }
+  for (const { name, result } of editors) {
+    if (result.targets > 0) {
+      log(`${name} (${result.targets}): ${describe(result.changed)}`);
+    }
+  }
+  if (applied.targets === 0 && editorTargets(editors) === 0) {
     notifyNoTarget();
     return;
   }
-  log(`applied (${applied.targets}): ${describe(applied.changed)}`);
   warnFailed(applied.failed, interactive);
+  warnEditorFailures(editors, interactive);
   warnUnanchored(applied.unanchored);
-  if (interactive && applied.changed.length > 0) await refreshWebviews();
+  const changed = [...applied.changed, ...editorChanges(editors)];
+  if (interactive && changed.length > 0) await refreshWebviews();
 }
 
 function warnUnanchored(unanchored) {
@@ -120,12 +203,12 @@ function warnUnanchored(unanchored) {
   );
 }
 
-function warnFailed(failed, interactive) {
+function warnFailed(failed, interactive, subject = 'Claude Code') {
   if (!failed || failed.length === 0) return;
   log(`failed: ${failed.join('; ')}`);
   if (!interactive) return;
   vscode.window.showWarningMessage(
-    `Rastin: ${failed.length} Claude Code build(s) not patched. See the Rastin output channel.`,
+    `Rastin: ${failed.length} ${subject} build(s) not patched. See the Rastin output channel.`,
   );
 }
 
@@ -135,7 +218,7 @@ function describe(changed) {
 
 function notifyNoTarget() {
   vscode.window.showWarningMessage(
-    'Rastin: no installed Claude Code VS Code extension (anthropic.claude-code-*) found.',
+    'Rastin: no installed Claude Code, Codex, or Office Viewer VS Code extension found.',
   );
 }
 
@@ -194,7 +277,7 @@ async function showMenu() {
         ),
     },
     {
-      label: '$(wrench) Repair after Claude Code update',
+      label: '$(wrench) Repair after Claude Code or Codex update',
       run: () => sync(true),
     },
     {
@@ -204,7 +287,7 @@ async function showMenu() {
   ];
 
   const pick = await vscode.window.showQuickPick(items, {
-    title: 'Rastin — Claude Code',
+    title: 'Rastin',
   });
   if (pick) await pick.run();
 }

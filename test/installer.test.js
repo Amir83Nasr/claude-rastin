@@ -55,3 +55,31 @@ test('paragraphs added after load are oriented by the observer', async () => {
   await settle();
   assert.equal(paragraph.getAttribute('dir'), 'rtl');
 });
+
+test('todo items added to a live todo list take their own direction', async () => {
+  // A todo joins the list under the tool card's root, inside its LTR island.
+  // The closest root is the card, whose blocks are all islands, so the new
+  // item has to be queued from the insertion itself.
+  const window = page(
+    '<div data-testid="assistant-message"><div class="toolUse_uq5aLg">' +
+      '<div class="root_ZUQaOA"><div class="toolBody_a1">' +
+      '<ul class="todoList_xheXVQ"></ul>' +
+      '</div></div></div></div>',
+  );
+  const list = window.document.querySelector('.todoList_xheXVQ');
+  const texts = ['تست انتها-به-انتها با pnpm build', 'Fix the tooltip text'];
+  for (const text of texts) {
+    const item = window.document.createElement('li');
+    item.className = 'todoItem_xheXVQ';
+    item.innerHTML =
+      '<input type="checkbox" disabled><div class="content_xheXVQ"></div>';
+    item.querySelector('.content_xheXVQ').textContent = text;
+    list.appendChild(item);
+  }
+
+  await settle();
+  const [persian, english] =
+    window.document.querySelectorAll('.content_xheXVQ');
+  assert.equal(persian.getAttribute('dir'), 'rtl');
+  assert.equal(english.getAttribute('dir'), 'ltr');
+});

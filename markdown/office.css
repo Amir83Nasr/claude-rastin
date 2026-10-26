@@ -1,0 +1,68 @@
+/* ── OFFICE VIEWER (MARKDOWN EDITOR) ─────────────────────────────────── */
+
+/* The Office Viewer page is patched with this stylesheet and a script that
+   gives every block its own dir, so alignment follows the block in both
+   edit modes. The stylesheet itself is static, so every rule is keyed on
+   the marker the installer sets: with Rastin off the editor keeps Vditor's
+   own styles. */
+.vditor-reset[data-rastin-office]
+  :is(p, li, h1, h2, h3, h4, h5, h6, th, td, dl, dt, dd)[dir] {
+  text-align: start;
+}
+
+/* Vditor pads the physical left of lists, which leaves an RTL list's
+   markers hanging outside the viewport. Move the padding with the
+   direction; the markers follow `dir` themselves. */
+.vditor-reset[data-rastin-office] :is(ul, ol)[dir='rtl'] {
+  padding-left: 0;
+  padding-right: 2em;
+}
+
+/* Task items put a checkbox where the marker would be. Vditor hangs it into
+   the physical left padding with a left margin; a logical margin hangs it
+   into the inline-start side of each item instead. A mixed list can hold
+   items of both directions, so both sides reserve the same room. */
+.vditor-reset[data-rastin-office] :is(ul, ol):has(> li.vditor-task) {
+  padding-inline: 2em;
+}
+/* A list with a blank line between its items (a "loose" list) wraps each item
+   in a <p>; the checkbox is then inside that paragraph, not a child of the
+   <li>. Vditor's own rule is a descendant selector for the same reason, so
+   this one has to be too: matching only direct children left every loose
+   task item on the physical left margin, back on top of the RTL text. */
+.vditor-reset[data-rastin-office] li.vditor-task input[type='checkbox'] {
+  margin-inline: -1.6em 0.2em;
+}
+
+/* A mixed-script item keeps its marker inside so it does not sit on the
+   wrong side of the list. */
+.vditor-reset[data-rastin-office] :is(ul, ol)[dir='rtl'] > li[dir='ltr'],
+.vditor-reset[data-rastin-office] :is(ul, ol)[dir='ltr'] > li[dir='rtl'] {
+  list-style-position: inside;
+}
+
+/* Vditor draws the quote bar on the physical left. Logical sides follow
+   the blockquote's own dir; `[dir]` keeps the host untouched if the
+   installer never ran. */
+.vditor-reset[data-rastin-office] blockquote[dir] {
+  border-left-width: 0;
+  border-inline-start-width: 5px;
+  border-inline-start-style: solid;
+  padding: 0;
+  padding-inline: 1em;
+}
+
+/* ── LTR ISLANDS ──────────────────────────────────────────────────────── */
+
+/* Code reads left-to-right in either script. Descendant selectors on
+   purpose: the IR editor root is itself a <pre> and must follow the page. */
+.vditor-reset[data-rastin-office] :is(pre, code, kbd, samp) {
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+
+/* Arrow mirror spans: RTL paragraphs point arrows the RTL way. */
+[data-rastin-mirror] {
+  display: inline-block;
+  transform: scaleX(-1);
+}

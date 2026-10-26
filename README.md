@@ -1,15 +1,17 @@
 <p align="left"><img src="assets/logo.png" width="120" alt="Rastin"></p>
 
-# Rastin for Claude Code (VS Code)
+# Rastin for Claude Code and Codex (VS Code)
 
-Persian chat layout for the Claude Code VS Code extension: the IranYekanX face,
-right-to-left prose, and automatic per-paragraph direction. Code blocks, tool
-calls, and command rows stay left-to-right. The same direction rules also apply
-to VS Code's built-in Markdown preview.
+Persian chat layout for the Claude Code (`anthropic.claude-code`) and Codex
+(`openai.chatgpt`) VS Code extensions: the IranYekanX face, right-to-left
+prose, and automatic per-paragraph direction. Code blocks, tool calls, and
+command rows stay left-to-right. The same direction rules also apply to VS
+Code's built-in Markdown preview and to the Markdown editor of the Office
+Viewer extension.
 
 Like the [Rastin DSH bundle](https://github.com/Amir83Nasr/dsh-rastin), this is a
-layout layer — it does not touch Claude's behavior, auth, or files outside
-Claude Code's own webview assets. Direction is automatic by default;
+layout layer — it does not touch Claude's behavior, auth, or files outside the
+extensions it patches. Direction is automatic by default;
 `rastin.direction` can pin the whole chat to RTL or LTR when you would rather
 not have it decided per paragraph.
 
@@ -41,15 +43,27 @@ not have it decided per paragraph.
   text stays byte-identical. Arrows in an LTR paragraph stay untouched.
 - **LTR islands** — `pre`/`code`, code blocks, tool calls/results, thinking
   blocks, attachment rows, and icon rows keep LTR geometry and left alignment.
+  A todo card whose items all read RTL is the exception: its "Update Todos"
+  header moves right with the list, and any Latin item keeps the header LTR.
 - **RTL user bubbles** sit on the right when their own text is RTL.
 - **Composer** — RTL text entry with bidi-aware (`unicode-bidi: plaintext`)
   rendering.
+- **Codex chat** — the same face, per-paragraph direction, arrow mirroring, and
+  forced direction in Codex's assistant replies, user messages, and composer.
+  Code blocks and writing blocks stay LTR islands. Controlled by
+  `rastin.codex`; the Codex page is patched in place and restored on disable.
 - **Markdown preview** — the same per-block direction in VS Code's built-in
   Markdown preview: every paragraph, heading, list item, quote, and table cell
   is read on its own, code stays LTR, and arrows mirror in RTL paragraphs. The
   preview keeps VS Code's own font, size, and theme.
+- **Office Viewer editor** — the same per-block direction in the Markdown
+  editor of the Office Viewer extension (`cweijan.vscode-office`), in both
+  WYSIWYG and IR modes: every paragraph, heading, list item, quote, and table
+  cell is read on its own, code and math stay LTR, and quote bars, list
+  markers, and arrows follow the block. The editor keeps its own font, size,
+  and theme.
 - **Font controls** — weight, family, font file, size, code font, line height
-  and an optional Claude palette are VS Code settings.
+  and an optional Claude palette (Claude Code chat) are VS Code settings.
 
 ## How it works
 
@@ -70,8 +84,9 @@ previous block instead of stacking. Patches from
 
 Claude Code updates replace these files, wiping the patch. Rastin re-applies on
 every VS Code startup and whenever an extension is installed, updated, or
-removed, so `Rastin: Repair after Claude Code update` is only needed when that
-does not happen. The chat webview reloads itself when the patch changes.
+removed, so `Rastin: Repair after Claude Code or Codex update` is only needed
+when that does not happen. The chat webview reloads itself when the patch
+changes.
 
 Rastin's selectors depend on Claude Code's class names. Before patching, it
 checks the bundle for the core names (`root_`, `userMessage_`, `messageInput_`,
@@ -100,6 +115,58 @@ LTR in every mode.
 `rastin.direction: rtl | ltr` pins every block and the preview wrapper.
 `rastin.markdownPreview: false` (or the `rastin.enabled` master switch) leaves
 the preview alone. A change applies the next time the preview loads.
+
+## Office Viewer (Markdown Editor)
+
+The Markdown editor in the Office Viewer extension is served by that extension,
+not by VS Code, so it gets none of the preview contributions. Rastin patches
+its page in place, the same way it patches Claude Code:
+
+- copies `markdown/office.css`, `webview/direction.js`, and
+  `markdown/office.js` into the extension's `resource/markdown/` directory;
+- writes `resource/markdown/rastin.config.js` with the two values the page
+  cannot read for itself (`rastin.officeViewer`, `rastin.direction`);
+- inserts a marked block before `</html>` in `resource/markdown/index.html`.
+
+The page loads those files each time an editor opens, so both edit modes —
+WYSIWYG and IR — run the same engine as the chat and the preview. Every block
+is read on its own, code and math are LTR islands, list padding and quote
+borders move to the block's side, and arrows mirror in RTL prose. Vditor
+rewrites the DOM while you type, so the installer re-orients after edits; a
+block being edited keeps its arrows unwrapped until the caret leaves it.
+
+`rastin.direction: rtl | ltr` pins every block. `rastin.officeViewer: false`
+(or the `rastin.enabled` master switch) removes the patch and its generated
+files and restores the page. The editor reads the setting when it opens, so
+reopen the file after a change. Updating the Office Viewer replaces its page;
+Rastin re-patches it on the next startup or extension change.
+
+## Codex (VS Code extension)
+
+The Codex extension is a Vite-built React app served from its own webview. It
+cannot read VS Code settings either, so Rastin patches its page rather than
+its bundles:
+
+- copies `webview/direction.js` and `webview/codex.js` into the extension's
+  `webview/` directory, next to the app's hashed assets;
+- generates `webview/rastin.codex.css` from the font settings, with the faces
+  copied to `webview/rastin-fonts/`;
+- writes `webview/rastin.codex.config.js` with the values the page cannot read
+  for itself (`rastin.codex`, `rastin.direction`);
+- inserts a marked block before `</body>` in `webview/index.html` that links
+  the stylesheet and loads the config, the shared engine, and the installer.
+
+The app's own bundles are never edited, so a Codex update only needs the page
+re-patched. Assistant replies (`data-markdown-text-style`) and user messages
+(`data-markdown-text-tone`) are oriented paragraph by paragraph; the composer
+already carries `dir="auto"` from ProseMirror, so only a forced direction
+reaches it, through CSS. Rastin's styles stay inert until an installer pass
+marks `<html>`, so the stock chat is untouched before the first message.
+
+`rastin.direction: rtl | ltr` pins the messages and the composer.
+`rastin.codex: false` (or the `rastin.enabled` master switch) removes the patch
+and its generated files and restores the page. Updating Codex replaces its
+page; Rastin re-patches it on the next startup or extension change.
 
 ## Install
 
@@ -141,6 +208,8 @@ is no Marketplace publish, so the `.vsix` from the release is the download.
 | `rastin.enabled`         | `true` / `false`                                     | `true`              |
 | `rastin.direction`       | `auto` / `rtl` / `ltr`                               | `auto`              |
 | `rastin.markdownPreview` | `true` / `false`                                     | `true`              |
+| `rastin.officeViewer`    | `true` / `false`                                     | `true`              |
+| `rastin.codex`           | `true` / `false`                                     | `true`              |
 | `rastin.fontWeight`      | `200` – `700`                                        | `300`               |
 | `rastin.fontFamily`      | installed family name                                | `IRANYekanX`        |
 | `rastin.fontFile`        | absolute `.woff2`/`.woff`/`.ttf`/`.otf` path         | bundled IranYekanX  |
@@ -149,12 +218,12 @@ is no Marketplace publish, so the `.vsix` from the release is the download.
 | `rastin.codeFontFamily`  | installed family name                                | VS Code editor font |
 | `rastin.theme`           | `vscode` / `claude` / `claude-light` / `claude-dark` | `vscode`            |
 
-`rastin.fontFile` wins over `rastin.fontFamily`: the file is copied into the
-webview next to the bundled faces and used as `RastinUser`, because the webview
-CSP blocks `data:` fonts. Its file name carries a content hash, so swapping the
-font can never be served from the webview cache, and the previous copy is
-removed on the next patch. A family that is not installed falls back to
-IranYekanX.
+`rastin.fontFile` wins over `rastin.fontFamily`: the file is copied into each
+patched chat's webview next to the bundled faces and used as `RastinUser`,
+because the webview CSP blocks `data:` fonts. Its file name carries a content
+hash, so swapping the font can never be served from the webview cache, and the
+previous copy is removed on the next patch. A family that is not installed
+falls back to IranYekanX.
 
 `rastin.lineHeight` is a list, not a free number: VS Code's number field steps
 by 1, so the 0.1 steps only exist as list options (arrow keys move one option,
@@ -177,10 +246,11 @@ status colors), including the aliases the host resolves at `<html>`:
 High-contrast themes are never repainted: every palette rule is scoped with
 `:not([class*="high-contrast"])`, so accessibility colors stay the host's.
 
-Settings apply on change: Rastin re-patches the webview and reloads the chat
-webview in place, so no window reload is needed. The Markdown preview reads its
-settings when it loads, so a direction change reaches it on the next preview
-load.
+Settings apply on change: Rastin re-patches the webviews and reloads the chat
+webviews in place, so no window reload is needed. The Markdown preview reads
+its settings when it loads, so a direction change reaches it on the next
+preview load. The Office Viewer editor also reads the setting when it opens,
+so reopen the file after a change.
 
 The status bar item opens the Rastin menu (settings, repair, enable/disable);
 its tooltip names the current direction mode (automatic or forced).
@@ -189,8 +259,12 @@ its tooltip names the current direction mode (automatic or forced).
 
 - Claude Code sidebar/editor chat (`anthropic.claude-code-*`). VS Code, Cursor,
   Antigravity, and Kiro extension directories are scanned.
+- The Codex chat (`openai.chatgpt-*`), in the same directories. Only the page
+  and Rastin's own files are touched; Codex's hashed bundles stay as shipped.
 - VS Code's built-in Markdown preview, through its contributed styles and
   scripts. Direction only: the preview keeps its own font, size, and theme.
+- The Markdown editor of Office Viewer (`cweijan.vscode-office`), in WYSIWYG
+  and IR modes. Direction only: the editor keeps its own font, size, and theme.
 - Plan Preview (the separate editor tab) is not patched yet.
-- The patch lives inside Claude Code's extension directory; uninstall or update
-  of that extension removes it. `Rastin: Disable` restores the files.
+- The patches live inside those extensions' directories; uninstall or update of
+  an extension removes its patch. `Rastin: Disable` restores the files.

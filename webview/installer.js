@@ -128,8 +128,21 @@
     rafId = schedule(flush);
   }
 
+  // An insertion can carry seats its target does not reveal. A todo that
+  // joins a live list lands as a new <li> under the tool card's root, and
+  // the card's blocks sit in an island, so the closest root is never the
+  // item's own seat. Queue every root the inserted subtree holds.
+  function queueInserted(nodes) {
+    for (var node of nodes) {
+      if (node.nodeType !== 1) continue;
+      if (node.matches(ROOT_SELECTOR)) pending.add(node);
+      for (var root of node.querySelectorAll(ROOT_SELECTOR)) pending.add(root);
+    }
+  }
+
   var observer = new MutationObserver(function (records) {
     for (var record of records) {
+      if (record.type === 'childList') queueInserted(record.addedNodes);
       var target = record.target;
       var host =
         target !== null && typeof target === 'object' && target.nodeType === 3

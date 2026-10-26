@@ -181,6 +181,18 @@ samp,
   text-align: left;
 }
 
+/* A todo card whose items all read RTL is a Persian list, so its header
+   follows: "Update Todos" titles that list, and pinned left by the island
+   rule above it sits across the card from its own items. A list with any
+   Latin item keeps the LTR header, the way tool chrome reads. */
+[class*='toolUse_']:has(
+    [class*='todoItem_'] [class*='content_'][dir='rtl']
+  ):not(:has([class*='todoItem_'] [class*='content_'][dir='ltr']))
+  [class*='toolSummary_'] {
+  direction: rtl;
+  text-align: start;
+}
+
 /* Claude renders the ★ Insight header and its ─ footer as block-level,
    fit-content <code> scaffolding. Auto margins are zeroed by default, so
    under an RTL paragraph the box lands on the right. Pin it physically

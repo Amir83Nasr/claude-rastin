@@ -10,6 +10,36 @@ before tagging.
 
 ## [Unreleased]
 
+### Added
+
+- The font and direction rules now apply to the Codex extension's chat
+  (`openai.chatgpt`): assistant replies, user messages, and the composer get
+  the IranYekanX face and per-block direction, arrows mirror in RTL prose, and
+  code and writing blocks stay LTR. The page is patched in place — Codex's
+  hashed bundles are untouched — and restored on disable. Controlled by the new
+  `rastin.codex` setting (on by default).
+- The direction rules now apply to the Markdown editor of the Office Viewer
+  extension (`cweijan.vscode-office`), in both WYSIWYG and IR modes. Every
+  paragraph, heading, list item, quote, and table cell is read on its own,
+  code and math stay LTR, quote bars and list markers follow the block, and
+  arrows mirror in RTL prose. The extension's editor page is patched in place
+  and restored on disable. Controlled by the new `rastin.officeViewer` setting
+  (on by default); reopen an open file after changing it, since the editor
+  reads the setting when it opens.
+
+### Changed
+
+- A todo card whose items all read RTL now takes its "Update Todos" header
+  with the list: the header moves right instead of sitting across the card
+  from its items. A list with any Latin item keeps the LTR tool header.
+
+### Fixed
+
+- Todo items that join a todo list after the chat is already on screen now take
+  their own direction. Before, a Persian item added to a live list kept the
+  LTR tool-card layout: its checkbox sat on the left and its text aligned left.
+  Items present at load were not affected.
+
 ## [0.5.0] - 2026-10-26
 
 ### Added

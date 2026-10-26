@@ -302,9 +302,11 @@ function seatText(seat, limit = SCAN_CHARS) {
 
 /**
  * Orient one seat from its leading word run.
+ * @param {string} [text] the prose to vote with; defaults to the seat's own
+ *   prose. The editor passes it without the word under the caret.
  * @returns {'write'|'skip'|undefined} undefined when locked LTR or no letters.
  */
-function orientSeat(seat) {
+function orientSeat(seat, text = seatText(seat)) {
   // rastin.direction: rtl/ltr pins every seat, so the chat reads one way
   // regardless of script. Arrows are still mirrored and the stale-lock
   // bookkeeping is dropped: nothing can override a forced direction.
@@ -317,7 +319,7 @@ function orientSeat(seat) {
     return 'write';
   }
 
-  const verdict = detectSeatDir(seatText(seat));
+  const verdict = detectSeatDir(text);
   if (verdict === null) return undefined;
 
   // A locked seat normally stays LTR while English text streams in. If the
@@ -390,7 +392,9 @@ function mirrorSeatArrows(seat, doc = seat?.ownerDocument) {
     }
   }
   // Merge split text runs back after an unwrap so streaming diffs stay cheap.
-  if (!rtl) seat.normalize?.();
+  // Only an unwrap splits runs; normalizing an untouched seat is a mutation
+  // for nothing, and the observer would queue the seat again.
+  if (!rtl && changed > 0) seat.normalize?.();
   return changed;
 }
 

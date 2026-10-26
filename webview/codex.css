@@ -1,0 +1,92 @@
+/* ── CODEX (VS CODE EXTENSION) ───────────────────────────────────────── */
+
+/* Codex serves a React app from webview/; the page patch adds this
+   stylesheet and the installer after the app loads. Every rule is keyed on
+   the marker the installer sets on <html>, so the host keeps its own styles
+   until Rastin reaches a chat. */
+
+/* ── FONT ─────────────────────────────────────────────────────────────── */
+
+/* Chat prose and the composer. Codex sets the content font on the prose
+   blocks themselves, so the face is restated there, and the composer root
+   carries it for the text ProseMirror inserts. */
+html[data-rastin-codex]
+  :is(
+    [data-markdown-text-style='assistant-message'],
+    [data-markdown-text-tone='user-message'],
+    [class*='RichTextInput_'] .ProseMirror,
+    .ProseMirror[data-composer-markdown]
+  ) {
+  font-family: var(--rastin-font-family) !important;
+  font-weight: var(--rastin-font-weight) !important;
+}
+
+html[data-rastin-codex]
+  :is(
+    [data-markdown-text-style='assistant-message'],
+    [data-markdown-text-tone='user-message']
+  )
+  :is(p, li, h1, h2, h3, h4, h5, h6, blockquote, td, th, dl, dt, dd) {
+  font-family: var(--rastin-font-family) !important;
+}
+
+/* Code blocks read their family from --font-code-family, which Codex sets on
+   <html>; restating it here keeps rastin.codeFontFamily working. */
+html[data-rastin-codex] {
+  --font-code-family: var(--rastin-code-font);
+}
+
+/* Prose blocks set their own line height; headings and code keep the host's
+   rhythm. */
+html[data-rastin-codex]
+  :is(
+    [data-markdown-text-style='assistant-message'],
+    [data-markdown-text-tone='user-message']
+  )
+  :is(p, li, blockquote, td, th, dl, dt, dd) {
+  line-height: var(--rastin-line-height) !important;
+}
+
+/* ── DIRECTION ────────────────────────────────────────────────────────── */
+
+/* The installer writes dir on every prose block; the attribute is the base
+   direction, so start alignment follows the block's verdict and not the
+   host's first-strong-character guess. */
+html[data-rastin-codex] [dir] {
+  text-align: start;
+  unicode-bidi: isolate;
+}
+
+/* A list item in the other script than its list keeps its marker inside,
+   so the marker follows the item instead of the list's padding side. */
+html[data-rastin-codex]
+  :is(
+    [data-markdown-text-style='assistant-message'],
+    [data-markdown-text-tone='user-message']
+  )
+  :is(ul, ol)[dir='rtl']
+  > li[dir='ltr'],
+html[data-rastin-codex]
+  :is(
+    [data-markdown-text-style='assistant-message'],
+    [data-markdown-text-tone='user-message']
+  )
+  :is(ul, ol)[dir='ltr']
+  > li[dir='rtl'] {
+  list-style-position: inside;
+}
+
+/* ── LTR ISLANDS ──────────────────────────────────────────────────────── */
+
+/* Code reads left-to-right in either script. Codex puts code and inline code
+   inside the same markdown root, so they need an explicit island. */
+html[data-rastin-codex] :is(pre, code, kbd, samp) {
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+
+/* Arrow mirror spans: RTL paragraphs point arrows the RTL way. */
+[data-rastin-mirror] {
+  display: inline-block;
+  transform: scaleX(-1);
+}
