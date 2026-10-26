@@ -10,6 +10,8 @@ before tagging.
 
 ## [Unreleased]
 
+## [0.5.1] - 2026-10-26
+
 ### Added
 
 - The font and direction rules now apply to the Codex extension's chat

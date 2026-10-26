@@ -2,7 +2,7 @@
   "name": "claude-rastin",
   "displayName": "Rastin — Persian RTL for Claude Code and Codex",
   "description": "IranYekanX face and per-message RTL/LTR direction for Claude Code and Codex chats in VS Code. Code and tool rows stay LTR.",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "publisher": "amir83nasr",
   "license": "MIT",
   "icon": "assets/icon.png",
